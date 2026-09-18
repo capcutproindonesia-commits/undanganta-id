@@ -1,0 +1,11 @@
+# Security checklist
+- `APP_DEBUG=false` in production.
+- Generate a unique `APP_KEY`; never commit `.env`.
+- Change seeded admin credentials before production seeding.
+- Use HTTPS only and secure session cookies.
+- Limit uploads at both Nginx and Laravel validation layers.
+- Store public user media on S3/R2 when scaling; enable malware/image processing if required.
+- Keep signed check-in URLs private; optionally add staff authentication before marking attendance.
+- Add rate limiting/CAPTCHA to public RSVP and guest upload endpoints before high-volume launch.
+- Use managed database backups and test restore procedures.
+- Payment verification in this build is manual; integrate a supported payment gateway before accepting automated transactions.

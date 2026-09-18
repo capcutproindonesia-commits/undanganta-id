@@ -1,0 +1,3 @@
+<?php
+namespace App\Http\Controllers; use App\Models\{Invitation,Plan}; use Illuminate\Http\Request;
+class OrderController extends Controller { public function store(Request $r,Invitation $invitation){$this->authorize('update',$invitation);$d=$r->validate(['plan_id'=>'required|exists:plans,id','payment_method'=>'required|max:50','payment_proof'=>'nullable|image|max:8192']);$p=Plan::findOrFail($d['plan_id']);$proof=$r->hasFile('payment_proof')?$r->file('payment_proof')->store('payment-proofs','public'):null;$r->user()->orders()->create(['invitation_id'=>$invitation->id,'plan_id'=>$p->id,'amount'=>$p->price,'status'=>'pending','payment_method'=>$d['payment_method'],'payment_proof'=>$proof]);return back()->with('ok','Order dibuat, menunggu verifikasi admin.');} }

@@ -1,0 +1,3 @@
+<?php
+namespace Database\Seeders;use App\Models\{Plan,User};use Illuminate\Database\Seeder;use Illuminate\Support\Facades\Hash;
+class DatabaseSeeder extends Seeder{public function run():void{User::updateOrCreate(['email'=>env('SUPERADMIN_EMAIL','admin@undanganta.id')],['name'=>'Super Admin UNDANGANTA.ID','password'=>Hash::make(env('SUPERADMIN_PASSWORD','ChangeMeNow!123')),'is_admin'=>true]);foreach([['Gratis','free',0,30,['1 undangan','RSVP','Buku tamu']],['Premium','premium',149000,365,['Guest photo','Amplop digital','Custom domain ready']],['Pro','pro',299000,730,['Semua Premium','Prioritas support','Masa aktif 2 tahun']]] as [$n,$c,$p,$d,$f])Plan::updateOrCreate(['code'=>$c],['name'=>$n,'price'=>$p,'duration_days'=>$d,'features'=>$f,'is_active'=>true]);}}

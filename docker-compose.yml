@@ -1,0 +1,53 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    env_file: .env
+    environment:
+      PORT: 8080
+      DB_HOST: db
+      REDIS_HOST: redis
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  worker:
+    build: .
+    entrypoint: ["php", "artisan", "queue:work", "--sleep=2", "--tries=3", "--timeout=120"]
+    env_file: .env
+    environment:
+      DB_HOST: db
+      REDIS_HOST: redis
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-undanganta}
+      MYSQL_USER: ${DB_USERNAME:-undanganta}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootsecret}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis-data:/data
+
+volumes:
+  mysql-data:
+  redis-data:

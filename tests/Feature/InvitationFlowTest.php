@@ -1,0 +1,3 @@
+<?php
+namespace Tests\Feature;use App\Models\{Invitation,User};use Illuminate\Foundation\Testing\RefreshDatabase;use Tests\TestCase;
+class InvitationFlowTest extends TestCase{use RefreshDatabase;public function test_user_can_create_and_publish_invitation():void{$u=User::factory()->create();$this->actingAs($u)->post('/invitations',['title'=>'A & B','slug'=>'a-b','groom_name'=>'A','bride_name'=>'B','event_date'=>'2026-12-20 10:00:00','venue_name'=>'Makassar','theme'=>'modern'])->assertRedirect();$i=Invitation::first();$this->actingAs($u)->post(route('invitations.publish',$i))->assertRedirect();$this->assertTrue($i->fresh()->is_published);$this->get('/u/a-b')->assertOk()->assertSee('A');}}

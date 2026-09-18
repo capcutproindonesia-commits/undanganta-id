@@ -1,0 +1,17 @@
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_IMAGE}
+      - .
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_IMAGE}
+images:
+  - ${_IMAGE}
+substitutions:
+  _IMAGE: asia-southeast2-docker.pkg.dev/$PROJECT_ID/undanganta/app:$COMMIT_SHA
+options:
+  logging: CLOUD_LOGGING_ONLY
