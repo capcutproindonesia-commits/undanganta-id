@@ -1,3 +1,19 @@
+@php
+    $isHome = request()->routeIs('home');
+
+    $pageTitle = $title
+        ?? ($isHome
+            ? 'UNDANGANTA.ID — Undangan Digital Personal'
+            : 'UNDANGANTA.ID');
+
+    $pageDescription = $description
+        ?? ($isHome
+            ? 'Buat undangan digital personal dengan tema pilihan, RSVP, buku tamu, guest photo, amplop digital, dan QR check-in dalam satu tempat.'
+            : 'UNDANGANTA.ID');
+
+    $canonicalUrl = url()->current();
+@endphp
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -13,7 +29,33 @@
         content="{{ csrf_token() }}"
     >
 
-    <title>{{ $title ?? 'UNDANGANTA.ID' }}</title>
+    <title>{{ $pageTitle }}</title>
+
+    <meta name="description" content="{{ $pageDescription }}">
+    <meta name="robots" content="{{ $isHome ? 'index,follow' : 'noindex,nofollow' }}">
+    <link rel="canonical" href="{{ $canonicalUrl }}">
+
+    @if($isHome)
+        <meta property="og:type" content="website">
+        <meta property="og:site_name" content="UNDANGANTA.ID">
+        <meta property="og:title" content="{{ $pageTitle }}">
+        <meta property="og:description" content="{{ $pageDescription }}">
+        <meta property="og:url" content="{{ $canonicalUrl }}">
+
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:title" content="{{ $pageTitle }}">
+        <meta name="twitter:description" content="{{ $pageDescription }}">
+
+        <script type="application/ld+json">
+            {!! json_encode([
+                '@context' => 'https://schema.org',
+                '@type' => 'WebSite',
+                'name' => 'UNDANGANTA.ID',
+                'url' => url('/'),
+                'description' => $pageDescription,
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+        </script>
+    @endif
 
     <style>
         *,
@@ -119,6 +161,42 @@
 
         .nav-menu form {
             margin: 0;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | HOME NAV — scoped, app pages stay unchanged
+        |--------------------------------------------------------------------------
+        */
+
+        .nav.home-nav {
+            background: rgba(255,255,255,.88);
+            border-bottom-color: rgba(23,23,25,.08);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+        }
+
+        .home-nav-links {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .home-nav-links a {
+            color: #55555b;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .home-nav-links a:hover {
+            color: #1d1d1f;
+        }
+
+        .nav a:focus-visible,
+        .nav button:focus-visible {
+            outline: 3px solid rgba(255,109,90,.22);
+            outline-offset: 3px;
         }
 
         /*
@@ -590,6 +668,12 @@
                 font-size: 12px;
             }
 
+
+            .home-nav-links {
+                display: none;
+            }
+
+
             .wrap {
                 width:
                     calc(100% - 24px);
@@ -621,7 +705,7 @@
 <body>
 
 
-<nav class="nav">
+<nav class="nav {{ $isHome ? 'home-nav' : '' }}">
 
     <div class="nav-inner">
 
@@ -634,6 +718,14 @@
 
 
         <div class="nav-menu">
+
+            @if($isHome)
+                <div class="home-nav-links" aria-label="Navigasi landing page">
+                    <a href="#tema">Tema</a>
+                    <a href="#harga">Harga</a>
+                    <a href="#cara-kerja">Cara kerja</a>
+                </div>
+            @endif
 
             @auth
 

@@ -599,6 +599,26 @@
             }
         }
 
+
+        .order-flow a:focus-visible,
+        .order-flow button:focus-visible,
+        .order-flow input:focus-visible,
+        .order-flow select:focus-visible,
+        .glass-notification-close:focus-visible {
+            outline: 3px solid rgba(29,29,31,.14);
+            outline-offset: 3px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .glass-notification-overlay,
+            .glass-notification,
+            .glass-notification-progress::after,
+            .copy-payment {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+
         @media (max-width: 640px) {
             .payment-method-card {
                 padding: 14px;
@@ -911,6 +931,7 @@
                                             type="button"
                                             class="copy-payment"
                                             data-copy="{{ $bank['account_number'] }}"
+                                            aria-label="Salin nomor rekening"
                                         >
                                             Salin
                                         </button>
@@ -1006,6 +1027,7 @@
                                             type="button"
                                             class="copy-payment"
                                             data-copy="{{ $wallet['number'] }}"
+                                            aria-label="Salin nomor e-wallet"
                                         >
                                             Salin
                                         </button>

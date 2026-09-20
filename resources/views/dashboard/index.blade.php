@@ -771,6 +771,27 @@
     }
 
 
+
+    .final-dashboard a:focus-visible,
+    .final-dashboard button:focus-visible {
+        outline: 3px solid rgba(29,29,31,.12);
+        outline-offset: 3px;
+    }
+
+    @media(prefers-reduced-motion: reduce) {
+        .fd-primary,
+        .fd-action,
+        .fd-nav-link,
+        .fd-row {
+            transition: none;
+        }
+
+        .fd-primary:hover,
+        .fd-action:hover {
+            transform: none;
+        }
+    }
+
     /* =========================================================
        RESPONSIVE
     ========================================================= */

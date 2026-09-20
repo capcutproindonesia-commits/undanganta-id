@@ -50,6 +50,24 @@
         margin: 0 auto;
     }
 
+
+    #tema,
+    #harga,
+    #cara-kerja {
+        scroll-margin-top: 82px;
+    }
+
+    .ut-themes,
+    .ut-features,
+    .ut-pricing,
+    .ut-proof,
+    .ut-faq,
+    .ut-how,
+    .ut-final {
+        content-visibility: auto;
+        contain-intrinsic-size: 800px;
+    }
+
     /*
     |--------------------------------------------------------------------------
     | HERO
@@ -206,6 +224,24 @@
         height: 6px;
         border-radius: 50%;
         background: #74b66a;
+    }
+
+
+    #tema,
+    #harga,
+    #cara-kerja {
+        scroll-margin-top: 82px;
+    }
+
+    .ut-themes,
+    .ut-features,
+    .ut-pricing,
+    .ut-proof,
+    .ut-faq,
+    .ut-how,
+    .ut-final {
+        content-visibility: auto;
+        contain-intrinsic-size: 800px;
     }
 
     /*
@@ -2170,7 +2206,7 @@
 
 
 
-    <section class="ut-themes">
+    <section class="ut-themes" id="tema">
 
         <div class="ut-container">
 
@@ -2329,10 +2365,10 @@
                 @auth
 
                     <a
-                        href="{{ route('dashboard') }}"
+                        href="{{ route('invitations.create') }}"
                         class="ut-theme-link"
                     >
-                        Lihat tema di dashboard
+                        Lihat semua tema
                     </a>
 
                 @else
@@ -2545,7 +2581,7 @@
 
 
 
-    <section class="ut-pricing">
+    <section class="ut-pricing" id="harga">
 
         <div class="ut-container">
 
@@ -2607,7 +2643,7 @@
                     <div class="ut-price-action">
 
                         @auth
-                            <a href="{{ route('dashboard') }}" class="ut-secondary">
+                            <a href="{{ route('invitations.themes', ['plan' => 'free']) }}" class="ut-secondary">
                                 Mulai gratis
                             </a>
                         @else
@@ -2654,7 +2690,7 @@
                     <div class="ut-price-action">
 
                         @auth
-                            <a href="{{ route('dashboard') }}" class="ut-primary">
+                            <a href="{{ route('invitations.themes', ['plan' => 'premium']) }}" class="ut-primary">
                                 Pilih Premium
                             </a>
                         @else
@@ -2701,7 +2737,7 @@
                     <div class="ut-price-action">
 
                         @auth
-                            <a href="{{ route('dashboard') }}" class="ut-secondary">
+                            <a href="{{ route('invitations.themes', ['plan' => 'pro']) }}" class="ut-secondary">
                                 Pilih Pro
                             </a>
                         @else
