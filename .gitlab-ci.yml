@@ -56,4 +56,5 @@ php_tests:
       - storage/logs/
 
   rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
     - if: '$CI_COMMIT_BRANCH == "codex/production-sync"'
