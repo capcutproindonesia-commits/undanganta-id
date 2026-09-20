@@ -531,6 +531,27 @@
         font-size:10px;
     }
 
+
+    .inv-page a:focus-visible,
+    .inv-page button:focus-visible,
+    .inv-page input:focus-visible,
+    .inv-page select:focus-visible {
+        outline: 3px solid rgba(29,29,31,.12);
+        outline-offset: 3px;
+    }
+
+    @media(prefers-reduced-motion: reduce) {
+        .inv-primary,
+        .inv-light {
+            transition: none;
+        }
+
+        .inv-primary:hover,
+        .inv-light:hover {
+            transform: none;
+        }
+    }
+
     /*
     |--------------------------------------------------------------------------
     | RESPONSIVE
@@ -675,7 +696,7 @@
             type="text"
             name="q"
             class="inv-search"
-            placeholder="Cari nama, judul, atau venue..."
+            placeholder="Cari nama, judul, atau venue..." aria-label="Cari undangan"
             value="{{ request('q') }}"
         >
 
@@ -684,6 +705,7 @@
             name="status"
             class="inv-select"
             id="invStatusFilter"
+            aria-label="Filter status undangan"
         >
 
             <option value="">
