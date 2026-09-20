@@ -1,0 +1,59 @@
+stages:
+  - test
+
+variables:
+  APP_ENV: testing
+  APP_DEBUG: "true"
+  DB_CONNECTION: sqlite
+  DB_DATABASE: "$CI_PROJECT_DIR/database/testing.sqlite"
+  CACHE_STORE: array
+  SESSION_DRIVER: array
+  QUEUE_CONNECTION: sync
+  MAIL_MAILER: array
+  LOG_CHANNEL: stderr
+
+php_tests:
+  stage: test
+  image: php:8.3-cli
+
+  before_script:
+    - apt-get update
+    - apt-get install -y git unzip libzip-dev libsqlite3-dev libonig-dev libpng-dev libjpeg62-turbo-dev libfreetype6-dev
+    - docker-php-ext-configure gd --with-freetype --with-jpeg
+    - docker-php-ext-install pdo_sqlite mbstring gd
+
+    - mkdir -p bootstrap/cache
+    - mkdir -p storage/framework/cache
+    - mkdir -p storage/framework/sessions
+    - mkdir -p storage/framework/views
+    - mkdir -p storage/logs
+    - mkdir -p database
+
+    - chmod -R 777 bootstrap/cache storage database
+
+    - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+    - php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+    - rm composer-setup.php
+
+    - composer install --prefer-dist --no-interaction --no-progress --no-scripts
+
+    - cp .env.example .env
+    - touch database/testing.sqlite
+
+    - php artisan key:generate
+    - php artisan package:discover --ansi
+    - php artisan config:clear
+    - php artisan view:clear
+
+  script:
+    - php artisan migrate:fresh --force
+    - php artisan test --testsuite=Feature
+
+  artifacts:
+    when: always
+    expire_in: 7 days
+    paths:
+      - storage/logs/
+
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "codex/production-sync"'
