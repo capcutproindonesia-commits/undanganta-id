@@ -326,7 +326,9 @@ class PublicInvitationController extends Controller
             404
         );
 
-        if (!$guest->checked_in_at) {
+        $alreadyCheckedIn = $guest->checked_in_at !== null;
+
+        if (!$alreadyCheckedIn) {
             $guest->update([
                 'checked_in_at' => now(),
             ]);
@@ -337,6 +339,7 @@ class PublicInvitationController extends Controller
             [
                 'invitation' => $invitation,
                 'guest' => $guest->fresh(),
+                'alreadyCheckedIn' => $alreadyCheckedIn,
             ]
         );
     }
