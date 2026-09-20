@@ -33,6 +33,17 @@
         box-sizing: border-box;
     }
 
+    .ut-home a:focus-visible,
+    .ut-home summary:focus-visible {
+        outline: 3px solid rgba(255,113,93,.28);
+        outline-offset: 3px;
+    }
+
+    .ut-home img,
+    .ut-home svg {
+        max-width: 100%;
+    }
+
     .ut-container {
         width: calc(100% - 40px);
         max-width: 1180px;
@@ -140,15 +151,16 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-height: 50px;
+        min-height: 48px;
         padding: 0 20px;
-        border-radius: 13px;
+        border-radius: 12px;
         font-size: 13px;
         font-weight: 700;
         transition:
             transform .2s ease,
             box-shadow .2s ease,
-            background .2s ease;
+            background .2s ease,
+            border-color .2s ease;
     }
 
     .ut-primary {
@@ -440,7 +452,7 @@
     */
 
     .ut-statement {
-        padding: 115px 0;
+        padding: 96px 0;
         border-top: 1px solid #f0efed;
         background: #ffffff;
     }
@@ -467,6 +479,278 @@
         line-height: 1.7;
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | THEME SHOWCASE
+    |--------------------------------------------------------------------------
+    */
+
+    .ut-themes {
+        padding: 10px 0 104px;
+        background: #ffffff;
+    }
+
+    .ut-themes-head {
+        display: grid;
+        grid-template-columns: minmax(0, .9fr) minmax(320px, .6fr);
+        gap: 48px;
+        align-items: end;
+        margin-bottom: 42px;
+    }
+
+    .ut-themes-head small {
+        display: block;
+        margin-bottom: 12px;
+        color: #88888e;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+    }
+
+    .ut-themes-head h2 {
+        max-width: 760px;
+        margin: 0;
+        font-size: clamp(42px, 5vw, 68px);
+        line-height: .98;
+        letter-spacing: -.055em;
+    }
+
+    .ut-themes-head p {
+        max-width: 460px;
+        margin: 0;
+        justify-self: end;
+        color: var(--ut-muted);
+        font-size: 15px;
+        line-height: 1.7;
+    }
+
+    .ut-theme-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+    .ut-theme-card {
+        position: relative;
+        min-height: 670px;
+        overflow: hidden;
+        border: 1px solid var(--ut-line);
+        border-radius: 30px;
+        background: #f7f5f1;
+        transition:
+            transform .28s ease,
+            box-shadow .28s ease,
+            border-color .28s ease;
+    }
+
+    .ut-theme-card:hover {
+        transform: translateY(-5px);
+        border-color: #d7d3cd;
+        box-shadow: 0 26px 70px rgba(34, 31, 27, .12);
+    }
+
+    .ut-theme-card-top {
+        position: relative;
+        z-index: 3;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 28px 28px 0;
+    }
+
+    .ut-theme-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+        color: #77777d;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+    }
+
+    .ut-theme-card h3 {
+        margin: 0;
+        font-size: 34px;
+        line-height: 1;
+        letter-spacing: -.045em;
+    }
+
+    .ut-theme-card-top p {
+        max-width: 330px;
+        margin: 10px 0 0;
+        color: var(--ut-muted);
+        font-size: 13px;
+        line-height: 1.55;
+    }
+
+    .ut-theme-badge {
+        flex: 0 0 auto;
+        padding: 7px 10px;
+        border: 1px solid rgba(23,23,25,.09);
+        border-radius: 999px;
+        background: rgba(255,255,255,.74);
+        color: #4f4f54;
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+    }
+
+    .ut-theme-preview {
+        position: absolute;
+        left: 50%;
+        bottom: -118px;
+        width: min(68%, 345px);
+        min-height: 500px;
+        transform: translateX(-50%) rotate(-3deg);
+        overflow: hidden;
+        border: 10px solid #19191b;
+        border-bottom-width: 30px;
+        border-radius: 34px;
+        box-shadow: 0 38px 80px rgba(44,39,34,.18);
+    }
+
+    .ut-theme-card:nth-child(2) .ut-theme-preview {
+        transform: translateX(-50%) rotate(3deg);
+    }
+
+    .ut-theme-modern {
+        background:
+            linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.7)),
+            #eee7df;
+    }
+
+    .ut-theme-classic {
+        background:
+            linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.58)),
+            #ebe1d2;
+    }
+
+    .ut-theme-mini {
+        padding: 30px 22px 24px;
+        text-align: center;
+    }
+
+    .ut-theme-mini small {
+        display: block;
+        color: #897d74;
+        font-size: 8px;
+        font-weight: 700;
+        letter-spacing: .16em;
+        text-transform: uppercase;
+    }
+
+    .ut-theme-mini-name {
+        margin-top: 18px;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 34px;
+        line-height: .95;
+        letter-spacing: -.04em;
+        color: #4f433a;
+    }
+
+    .ut-theme-modern .ut-theme-mini-name {
+        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-weight: 760;
+        color: #27272a;
+    }
+
+    .ut-theme-mini-date {
+        margin-top: 12px;
+        color: #8d8178;
+        font-size: 9px;
+    }
+
+    .ut-theme-photo {
+        position: relative;
+        margin: 22px 18px 0;
+        aspect-ratio: .82;
+        overflow: hidden;
+        border-radius: 22px;
+        background:
+            linear-gradient(150deg, #cab39f 0%, #866f5c 46%, #342d28 100%);
+    }
+
+    .ut-theme-card:nth-child(2) .ut-theme-photo {
+        background:
+            linear-gradient(150deg, #d7c5ab 0%, #8d7458 45%, #42352a 100%);
+    }
+
+    .ut-theme-photo::before,
+    .ut-theme-photo::after {
+        content: "";
+        position: absolute;
+        border-radius: 999px;
+    }
+
+    .ut-theme-photo::before {
+        width: 170px;
+        height: 250px;
+        left: -40px;
+        bottom: -95px;
+        background: rgba(255,237,217,.65);
+        transform: rotate(18deg);
+    }
+
+    .ut-theme-photo::after {
+        width: 145px;
+        height: 230px;
+        right: -35px;
+        top: 56px;
+        background: rgba(53,46,41,.58);
+        transform: rotate(-16deg);
+    }
+
+    .ut-theme-caption {
+        position: absolute;
+        left: 16px;
+        right: 16px;
+        bottom: 16px;
+        z-index: 2;
+        padding: 12px;
+        border: 1px solid rgba(255,255,255,.22);
+        border-radius: 14px;
+        background: rgba(255,255,255,.14);
+        backdrop-filter: blur(10px);
+        color: #ffffff;
+        font-size: 10px;
+        line-height: 1.45;
+    }
+
+    .ut-theme-actions {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 28px;
+    }
+
+    .ut-theme-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 46px;
+        padding: 0 18px;
+        border: 1px solid var(--ut-line);
+        border-radius: 12px;
+        background: #ffffff;
+        color: var(--ut-ink);
+        font-size: 12px;
+        font-weight: 700;
+        transition:
+            transform .2s ease,
+            border-color .2s ease;
+    }
+
+    .ut-theme-link:hover {
+        transform: translateY(-2px);
+        border-color: #cfcfcf;
+    }
+
     /*
     |--------------------------------------------------------------------------
     | FEATURE STORY
@@ -474,7 +758,7 @@
     */
 
     .ut-features {
-        padding: 0 0 120px;
+        padding: 0 0 104px;
         background: #ffffff;
     }
 
@@ -644,6 +928,499 @@
         background: var(--ut-peach);
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | PRICING
+    |--------------------------------------------------------------------------
+    */
+
+    .ut-pricing {
+        padding: 92px 0;
+        background: #f7f7f5;
+        border-top: 1px solid #eceae6;
+        border-bottom: 1px solid #eceae6;
+    }
+
+    .ut-pricing-head {
+        display: grid;
+        grid-template-columns: minmax(0, .9fr) minmax(320px, .6fr);
+        gap: 48px;
+        align-items: end;
+        margin-bottom: 42px;
+    }
+
+    .ut-pricing-head small {
+        display: block;
+        margin-bottom: 12px;
+        color: #88888e;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+    }
+
+    .ut-pricing-head h2 {
+        margin: 0;
+        max-width: 760px;
+        font-size: clamp(42px, 5vw, 68px);
+        line-height: .98;
+        letter-spacing: -.055em;
+    }
+
+    .ut-pricing-head p {
+        margin: 0;
+        max-width: 460px;
+        justify-self: end;
+        color: var(--ut-muted);
+        font-size: 15px;
+        line-height: 1.7;
+    }
+
+    .ut-pricing-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .ut-price-card {
+        position: relative;
+        display: flex;
+        min-height: 470px;
+        flex-direction: column;
+        padding: 28px;
+        border: 1px solid #dfddd8;
+        border-radius: 26px;
+        background: #ffffff;
+    }
+
+    .ut-price-card.is-featured {
+        background: #19191b;
+        color: #ffffff;
+        border-color: #19191b;
+        box-shadow: 0 28px 70px rgba(23,23,25,.14);
+    }
+
+    .ut-price-kicker {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 26px;
+    }
+
+    .ut-price-name {
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+
+    .ut-price-badge {
+        padding: 6px 9px;
+        border-radius: 999px;
+        border: 1px solid #e3e1dc;
+        color: #707077;
+        background: #faf9f7;
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+    }
+
+    .ut-price-card.is-featured .ut-price-badge {
+        border-color: #3a3a3f;
+        color: #d8d8dc;
+        background: #262629;
+    }
+
+    .ut-price-amount {
+        margin: 0;
+        font-size: clamp(38px, 4vw, 54px);
+        line-height: .95;
+        letter-spacing: -.05em;
+    }
+
+    .ut-price-amount span {
+        display: inline-block;
+        margin-left: 3px;
+        color: #818188;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0;
+    }
+
+    .ut-price-card.is-featured .ut-price-amount span {
+        color: #aaaab0;
+    }
+
+    .ut-price-duration {
+        margin-top: 12px;
+        color: #77777d;
+        font-size: 12px;
+    }
+
+    .ut-price-card.is-featured .ut-price-duration {
+        color: #aaaab0;
+    }
+
+    .ut-price-divider {
+        height: 1px;
+        margin: 26px 0;
+        background: #eceae6;
+    }
+
+    .ut-price-card.is-featured .ut-price-divider {
+        background: #333337;
+    }
+
+    .ut-price-features {
+        display: grid;
+        gap: 14px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .ut-price-features li {
+        position: relative;
+        padding-left: 20px;
+        color: #5f5f65;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .ut-price-card.is-featured .ut-price-features li {
+        color: #d1d1d5;
+    }
+
+    .ut-price-features li::before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        top: 0;
+        color: #5a9c52;
+        font-weight: 800;
+    }
+
+    .ut-price-card.is-featured .ut-price-features li::before {
+        color: #a7d99e;
+    }
+
+    .ut-price-action {
+        margin-top: auto;
+        padding-top: 28px;
+    }
+
+    .ut-price-action a {
+        width: 100%;
+    }
+
+    .ut-price-card.is-featured .ut-primary {
+        background: #ffffff;
+        color: #19191b;
+        box-shadow: none;
+    }
+
+    .ut-price-card.is-featured .ut-primary:hover {
+        background: #f4f4f5;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | TESTIMONIAL / SOCIAL PROOF
+    |--------------------------------------------------------------------------
+    */
+
+    .ut-proof {
+        padding: 82px 0;
+        background: #ffffff;
+    }
+
+    .ut-proof-head {
+        display: grid;
+        grid-template-columns: minmax(0, .95fr) minmax(300px, .55fr);
+        gap: 42px;
+        align-items: end;
+        margin-bottom: 30px;
+    }
+
+    .ut-proof-head small {
+        display: block;
+        margin-bottom: 12px;
+        color: #88888e;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+    }
+
+    .ut-proof-head h2 {
+        max-width: 700px;
+        margin: 0;
+        font-size: clamp(38px, 4.4vw, 58px);
+        line-height: .98;
+        letter-spacing: -.05em;
+    }
+
+    .ut-proof-head p {
+        max-width: 460px;
+        margin: 0;
+        justify-self: end;
+        color: var(--ut-muted);
+        font-size: 15px;
+        line-height: 1.7;
+    }
+
+    .ut-proof-grid {
+        display: grid;
+        grid-template-columns: 1.15fr .85fr;
+        gap: 18px;
+    }
+
+    .ut-quote-card {
+        position: relative;
+        min-height: 360px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        overflow: hidden;
+        padding: 28px;
+        border: 1px solid var(--ut-line);
+        border-radius: 26px;
+        background: #faf9f7;
+    }
+
+    .ut-quote-card.is-dark {
+        background: #19191b;
+        color: #ffffff;
+        border-color: #19191b;
+    }
+
+    .ut-quote-mark {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 58px;
+        line-height: .75;
+        color: var(--ut-peach);
+        opacity: .9;
+    }
+
+    .ut-quote-card blockquote {
+        max-width: 700px;
+        margin: 14px 0 26px;
+        font-size: clamp(24px, 2.8vw, 38px);
+        line-height: 1.06;
+        letter-spacing: -.035em;
+        font-weight: 700;
+    }
+
+    .ut-quote-card.is-dark blockquote {
+        color: #ffffff;
+    }
+
+    .ut-quote-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding-top: 20px;
+        border-top: 1px solid #e8e6e1;
+    }
+
+    .ut-quote-card.is-dark .ut-quote-meta {
+        border-color: #333337;
+    }
+
+    .ut-quote-person strong {
+        display: block;
+        font-size: 13px;
+    }
+
+    .ut-quote-person span {
+        display: block;
+        margin-top: 4px;
+        color: #83838a;
+        font-size: 11px;
+    }
+
+    .ut-quote-card.is-dark .ut-quote-person span {
+        color: #aaaab0;
+    }
+
+    .ut-quote-tag {
+        flex: 0 0 auto;
+        padding: 6px 9px;
+        border-radius: 999px;
+        border: 1px solid #dfddd8;
+        background: #ffffff;
+        color: #66666d;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+    }
+
+    .ut-quote-card.is-dark .ut-quote-tag {
+        background: #262629;
+        border-color: #3a3a3f;
+        color: #d6d6da;
+    }
+
+    .ut-proof-side {
+        display: grid;
+        gap: 18px;
+    }
+
+    .ut-proof-mini {
+        min-height: 168px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 22px;
+        border: 1px solid var(--ut-line);
+        border-radius: 22px;
+        background: #ffffff;
+    }
+
+    .ut-proof-mini p {
+        margin: 0;
+        color: #3c3c40;
+        font-size: 17px;
+        line-height: 1.4;
+        letter-spacing: -.015em;
+        font-weight: 650;
+    }
+
+    .ut-proof-mini footer {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 16px;
+        margin-top: 28px;
+    }
+
+    .ut-proof-mini strong {
+        display: block;
+        font-size: 12px;
+    }
+
+    .ut-proof-mini span {
+        display: block;
+        margin-top: 4px;
+        color: #85858b;
+        font-size: 10px;
+    }
+
+    .ut-proof-mini .ut-stars {
+        color: #e4a52f;
+        font-size: 12px;
+        letter-spacing: .08em;
+    }
+
+    .ut-proof-note {
+        margin-top: 18px;
+        color: #929298;
+        font-size: 10px;
+        line-height: 1.5;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | FAQ
+    |--------------------------------------------------------------------------
+    */
+
+    .ut-faq {
+        padding: 82px 0;
+        background: #f7f7f5;
+        border-top: 1px solid #eceae6;
+    }
+
+    .ut-faq-grid {
+        display: grid;
+        grid-template-columns: minmax(0, .72fr) minmax(0, 1fr);
+        gap: 70px;
+        align-items: start;
+    }
+
+    .ut-faq-copy small {
+        display: block;
+        margin-bottom: 12px;
+        color: #88888e;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+    }
+
+    .ut-faq-copy h2 {
+        max-width: 560px;
+        margin: 0;
+        font-size: clamp(40px, 4.8vw, 64px);
+        line-height: .98;
+        letter-spacing: -.05em;
+    }
+
+    .ut-faq-copy p {
+        max-width: 470px;
+        margin: 20px 0 0;
+        color: var(--ut-muted);
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .ut-faq-list {
+        border-top: 1px solid #dcdad5;
+    }
+
+    .ut-faq-item {
+        border-bottom: 1px solid #dcdad5;
+    }
+
+    .ut-faq-item summary {
+        list-style: none;
+        cursor: pointer;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 18px;
+        align-items: center;
+        padding: 22px 0;
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: -.015em;
+    }
+
+    .ut-faq-item summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .ut-faq-icon {
+        width: 28px;
+        height: 28px;
+        display: grid;
+        place-items: center;
+        border: 1px solid #d8d6d1;
+        border-radius: 50%;
+        background: #ffffff;
+        font-size: 15px;
+        font-weight: 600;
+        transition: transform .2s ease;
+    }
+
+    .ut-faq-item[open] .ut-faq-icon {
+        transform: rotate(45deg);
+    }
+
+    .ut-faq-answer {
+        max-width: 760px;
+        padding: 0 46px 22px 0;
+        color: var(--ut-muted);
+        font-size: 13px;
+        line-height: 1.7;
+    }
+
     /*
     |--------------------------------------------------------------------------
     | HOW IT WORKS
@@ -651,13 +1428,13 @@
     */
 
     .ut-how {
-        padding: 110px 0;
-        background: #f7f7f5;
+        padding: 88px 0;
+        background: #ffffff;
     }
 
     .ut-section-head {
         max-width: 680px;
-        margin-bottom: 50px;
+        margin-bottom: 38px;
     }
 
     .ut-section-head small {
@@ -686,12 +1463,12 @@
     }
 
     .ut-step {
-        min-height: 260px;
+        min-height: 220px;
         display: flex;
         flex-direction: column;
-        padding: 24px;
+        padding: 22px;
         border: 1px solid #e2e2df;
-        border-radius: 22px;
+        border-radius: 20px;
         background: #ffffff;
     }
 
@@ -728,7 +1505,7 @@
     */
 
     .ut-final {
-        padding: 100px 0;
+        padding: 86px 0;
         background: #19191b;
         color: #ffffff;
     }
@@ -773,7 +1550,7 @@
     */
 
     .ut-footer {
-        padding: 28px 0;
+        padding: 24px 0;
         border-top: 1px solid #303034;
         background: #19191b;
         color: #8f8f96;
@@ -843,6 +1620,23 @@
             left: 12%;
         }
 
+        .ut-themes-head {
+            grid-template-columns: 1fr;
+            gap: 18px;
+        }
+
+        .ut-themes-head p {
+            justify-self: start;
+        }
+
+        .ut-theme-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .ut-theme-card {
+            min-height: 650px;
+        }
+
         .ut-feature {
             grid-template-columns: 1fr;
         }
@@ -859,6 +1653,37 @@
         .ut-steps {
             grid-template-columns:
                 repeat(2, minmax(0,1fr));
+        }
+
+        .ut-pricing-head {
+            grid-template-columns: 1fr;
+            gap: 18px;
+        }
+
+        .ut-pricing-head p {
+            justify-self: start;
+        }
+
+        .ut-pricing-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .ut-proof-head {
+            grid-template-columns: 1fr;
+            gap: 18px;
+        }
+
+        .ut-proof-head p {
+            justify-self: start;
+        }
+
+        .ut-proof-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .ut-faq-grid {
+            grid-template-columns: 1fr;
+            gap: 34px;
         }
 
         .ut-final-box {
@@ -955,11 +1780,47 @@
         }
 
         .ut-statement {
-            padding: 80px 0;
+            padding: 68px 0;
         }
 
         .ut-statement h2 {
             font-size: 42px;
+        }
+
+        .ut-themes {
+            padding: 4px 0 68px;
+        }
+
+        .ut-themes-head {
+            margin-bottom: 28px;
+        }
+
+        .ut-themes-head h2 {
+            font-size: 42px;
+        }
+
+        .ut-theme-card {
+            min-height: 560px;
+            border-radius: 22px;
+        }
+
+        .ut-theme-card-top {
+            padding: 22px 20px 0;
+        }
+
+        .ut-theme-card h3 {
+            font-size: 30px;
+        }
+
+        .ut-theme-card-top p {
+            max-width: 250px;
+            font-size: 12px;
+        }
+
+        .ut-theme-preview {
+            width: min(72%, 280px);
+            min-height: 420px;
+            bottom: -118px;
         }
 
         .ut-feature {
@@ -979,8 +1840,80 @@
             width: 82%;
         }
 
+        .ut-pricing {
+            padding: 66px 0;
+        }
+
+        .ut-pricing-head {
+            margin-bottom: 28px;
+        }
+
+        .ut-pricing-head h2 {
+            font-size: 42px;
+        }
+
+        .ut-price-card {
+            min-height: 420px;
+            padding: 22px;
+            border-radius: 22px;
+        }
+
+        .ut-proof {
+            padding: 62px 0;
+        }
+
+        .ut-proof-head {
+            margin-bottom: 28px;
+        }
+
+        .ut-proof-head h2 {
+            font-size: 36px;
+        }
+
+        .ut-quote-card {
+            min-height: 315px;
+            padding: 22px;
+            border-radius: 20px;
+        }
+
+        .ut-quote-card blockquote {
+            font-size: 27px;
+        }
+
+        .ut-proof-mini {
+            min-height: 150px;
+            padding: 20px;
+            border-radius: 20px;
+        }
+
+        .ut-proof-mini p {
+            font-size: 16px;
+        }
+
+        .ut-faq {
+            padding: 60px 0;
+        }
+
+        .ut-faq-grid {
+            gap: 28px;
+        }
+
+        .ut-faq-copy h2 {
+            font-size: 36px;
+        }
+
+        .ut-faq-item summary {
+            padding: 18px 0;
+            font-size: 15px;
+        }
+
+        .ut-faq-answer {
+            padding: 0 38px 18px 0;
+            font-size: 12px;
+        }
+
         .ut-how {
-            padding: 75px 0;
+            padding: 64px 0;
         }
 
         .ut-steps {
@@ -988,11 +1921,11 @@
         }
 
         .ut-step {
-            min-height: 190px;
+            min-height: 165px;
         }
 
         .ut-final {
-            padding: 75px 0;
+            padding: 64px 0;
         }
 
         .ut-final h2 {
@@ -1236,6 +2169,190 @@
     </section>
 
 
+
+    <section class="ut-themes">
+
+        <div class="ut-container">
+
+            <div class="ut-themes-head ut-reveal">
+
+                <div>
+
+                    <small>
+                        Pilih tema
+                    </small>
+
+                    <h2>
+                        Pilih tampilan yang terasa paling kamu.
+                    </h2>
+
+                </div>
+
+                <p>
+                    Mulai dari gaya modern yang clean sampai nuansa klasik
+                    yang lebih hangat dan elegan. Lihat preview sebelum
+                    mulai mengisi undangan.
+                </p>
+
+            </div>
+
+
+            <div class="ut-theme-grid">
+
+                <article class="ut-theme-card ut-reveal">
+
+                    <div class="ut-theme-card-top">
+
+                        <div>
+
+                            <div class="ut-theme-label">
+                                Tema 01
+                            </div>
+
+                            <h3>
+                                Modern
+                            </h3>
+
+                            <p>
+                                Minimal, clean, contemporary.
+                                Cocok untuk tampilan yang ringan dan fokus ke konten.
+                            </p>
+
+                        </div>
+
+                        <div class="ut-theme-badge">
+                            Available
+                        </div>
+
+                    </div>
+
+
+                    <div class="ut-theme-preview ut-theme-modern">
+
+                        <div class="ut-theme-mini">
+
+                            <small>
+                                The Wedding Of
+                            </small>
+
+                            <div class="ut-theme-mini-name">
+                                Dims
+                                <br>
+                                & Rara
+                            </div>
+
+                            <div class="ut-theme-mini-date">
+                                18 Oktober 2026
+                            </div>
+
+                        </div>
+
+                        <div class="ut-theme-photo">
+
+                            <div class="ut-theme-caption">
+                                Save the date untuk hari istimewa kami.
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+
+                <article class="ut-theme-card ut-reveal">
+
+                    <div class="ut-theme-card-top">
+
+                        <div>
+
+                            <div class="ut-theme-label">
+                                Tema 02
+                            </div>
+
+                            <h3>
+                                Classic
+                            </h3>
+
+                            <p>
+                                Elegant, warm, timeless.
+                                Untuk nuansa yang lebih formal dan premium.
+                            </p>
+
+                        </div>
+
+                        <div class="ut-theme-badge">
+                            Premium
+                        </div>
+
+                    </div>
+
+
+                    <div class="ut-theme-preview ut-theme-classic">
+
+                        <div class="ut-theme-mini">
+
+                            <small>
+                                The Wedding Of
+                            </small>
+
+                            <div class="ut-theme-mini-name">
+                                Dims
+                                <br>
+                                & Rara
+                            </div>
+
+                            <div class="ut-theme-mini-date">
+                                18 Oktober 2026
+                            </div>
+
+                        </div>
+
+                        <div class="ut-theme-photo">
+
+                            <div class="ut-theme-caption">
+                                Dengan penuh kebahagiaan,
+                                kami mengundang Anda di hari istimewa kami.
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+            </div>
+
+
+            <div class="ut-theme-actions ut-reveal">
+
+                @auth
+
+                    <a
+                        href="{{ route('dashboard') }}"
+                        class="ut-theme-link"
+                    >
+                        Lihat tema di dashboard
+                    </a>
+
+                @else
+
+                    <a
+                        href="{{ route('register') }}"
+                        class="ut-theme-link"
+                    >
+                        Lihat semua tema
+                    </a>
+
+                @endauth
+
+            </div>
+
+        </div>
+
+    </section>
+
+
     <section class="ut-features">
 
         <div class="ut-container">
@@ -1421,6 +2538,404 @@
 
             </article>
 
+
+        </div>
+
+    </section>
+
+
+
+    <section class="ut-pricing">
+
+        <div class="ut-container">
+
+            <div class="ut-pricing-head ut-reveal">
+
+                <div>
+
+                    <small>
+                        Paket
+                    </small>
+
+                    <h2>
+                        Pilih paket sesuai kebutuhan acaramu.
+                    </h2>
+
+                </div>
+
+                <p>
+                    Mulai gratis untuk kebutuhan dasar, lalu upgrade saat
+                    kamu membutuhkan fitur tamu, amplop digital, dukungan
+                    prioritas, dan masa aktif yang lebih panjang.
+                </p>
+
+            </div>
+
+
+            <div class="ut-pricing-grid">
+
+                <article class="ut-price-card ut-reveal">
+
+                    <div class="ut-price-kicker">
+
+                        <div class="ut-price-name">
+                            Gratis
+                        </div>
+
+                        <div class="ut-price-badge">
+                            30 hari
+                        </div>
+
+                    </div>
+
+                    <h3 class="ut-price-amount">
+                        Rp0
+                    </h3>
+
+                    <div class="ut-price-duration">
+                        Aktif selama 30 hari
+                    </div>
+
+                    <div class="ut-price-divider"></div>
+
+                    <ul class="ut-price-features">
+                        <li>1 undangan</li>
+                        <li>RSVP</li>
+                        <li>Buku tamu</li>
+                    </ul>
+
+                    <div class="ut-price-action">
+
+                        @auth
+                            <a href="{{ route('dashboard') }}" class="ut-secondary">
+                                Mulai gratis
+                            </a>
+                        @else
+                            <a href="{{ route('register') }}" class="ut-secondary">
+                                Mulai gratis
+                            </a>
+                        @endauth
+
+                    </div>
+
+                </article>
+
+
+                <article class="ut-price-card is-featured ut-reveal">
+
+                    <div class="ut-price-kicker">
+
+                        <div class="ut-price-name">
+                            Premium
+                        </div>
+
+                        <div class="ut-price-badge">
+                            365 hari
+                        </div>
+
+                    </div>
+
+                    <h3 class="ut-price-amount">
+                        Rp149.000
+                    </h3>
+
+                    <div class="ut-price-duration">
+                        Aktif selama 365 hari
+                    </div>
+
+                    <div class="ut-price-divider"></div>
+
+                    <ul class="ut-price-features">
+                        <li>Guest photo</li>
+                        <li>Amplop digital</li>
+                        <li>Custom domain ready</li>
+                    </ul>
+
+                    <div class="ut-price-action">
+
+                        @auth
+                            <a href="{{ route('dashboard') }}" class="ut-primary">
+                                Pilih Premium
+                            </a>
+                        @else
+                            <a href="{{ route('register') }}" class="ut-primary">
+                                Pilih Premium
+                            </a>
+                        @endauth
+
+                    </div>
+
+                </article>
+
+
+                <article class="ut-price-card ut-reveal">
+
+                    <div class="ut-price-kicker">
+
+                        <div class="ut-price-name">
+                            Pro
+                        </div>
+
+                        <div class="ut-price-badge">
+                            730 hari
+                        </div>
+
+                    </div>
+
+                    <h3 class="ut-price-amount">
+                        Rp299.000
+                    </h3>
+
+                    <div class="ut-price-duration">
+                        Aktif selama 730 hari
+                    </div>
+
+                    <div class="ut-price-divider"></div>
+
+                    <ul class="ut-price-features">
+                        <li>Semua Premium</li>
+                        <li>Prioritas support</li>
+                        <li>Masa aktif 2 tahun</li>
+                    </ul>
+
+                    <div class="ut-price-action">
+
+                        @auth
+                            <a href="{{ route('dashboard') }}" class="ut-secondary">
+                                Pilih Pro
+                            </a>
+                        @else
+                            <a href="{{ route('register') }}" class="ut-secondary">
+                                Pilih Pro
+                            </a>
+                        @endauth
+
+                    </div>
+
+                </article>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <section class="ut-proof">
+
+        <div class="ut-container">
+
+            <div class="ut-proof-head ut-reveal">
+
+                <div>
+
+                    <small>
+                        Cerita pengguna
+                    </small>
+
+                    <h2>
+                        Dibuat untuk momen yang benar-benar berarti.
+                    </h2>
+
+                </div>
+
+                <p>
+                    UNDANGANTA.ID dirancang supaya pasangan bisa fokus ke acaranya,
+                    sementara undangan, tamu, RSVP, dan check-in tetap tertata.
+                </p>
+
+            </div>
+
+
+            <div class="ut-proof-grid">
+
+                <article class="ut-quote-card is-dark ut-reveal">
+
+                    <div>
+
+                        <div class="ut-quote-mark">
+                            “
+                        </div>
+
+                        <blockquote>
+                            Rasanya jauh lebih rapi karena semua tamu,
+                            RSVP, dan link undangan bisa dikelola dari satu tempat.
+                        </blockquote>
+
+                    </div>
+
+                    <div class="ut-quote-meta">
+
+                        <div class="ut-quote-person">
+                            <strong>Dinda & Fajar</strong>
+                            <span>Pengguna undangan digital</span>
+                        </div>
+
+                        <div class="ut-quote-tag">
+                            Wedding
+                        </div>
+
+                    </div>
+
+                </article>
+
+
+                <div class="ut-proof-side">
+
+                    <article class="ut-proof-mini ut-reveal">
+
+                        <p>
+                            “Tampilan undangannya clean dan gampang dibuka
+                            dari HP keluarga maupun teman.”
+                        </p>
+
+                        <footer>
+
+                            <div>
+                                <strong>Nadia & Reza</strong>
+                                <span>Makassar</span>
+                            </div>
+
+                            <div class="ut-stars">
+                                ★★★★★
+                            </div>
+
+                        </footer>
+
+                    </article>
+
+
+                    <article class="ut-proof-mini ut-reveal">
+
+                        <p>
+                            “Check-in QR bikin penerimaan tamu lebih cepat
+                            dan daftar hadir jadi lebih gampang dicek.”
+                        </p>
+
+                        <footer>
+
+                            <div>
+                                <strong>Alya & Rafi</strong>
+                                <span>Sulawesi Selatan</span>
+                            </div>
+
+                            <div class="ut-stars">
+                                ★★★★★
+                            </div>
+
+                        </footer>
+
+                    </article>
+
+                </div>
+
+            </div>
+
+            <div class="ut-proof-note ut-reveal">
+                Testimonial di atas masih berupa contoh tampilan dan akan diganti dengan ulasan pengguna asli.
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <section class="ut-faq">
+
+        <div class="ut-container">
+
+            <div class="ut-faq-grid">
+
+                <div class="ut-faq-copy ut-reveal">
+
+                    <small>
+                        FAQ
+                    </small>
+
+                    <h2>
+                        Pertanyaan yang paling sering muncul.
+                    </h2>
+
+                    <p>
+                        Ringkas, jelas, dan langsung ke hal yang biasanya
+                        perlu diketahui sebelum mulai membuat undangan.
+                    </p>
+
+                </div>
+
+
+                <div class="ut-faq-list ut-reveal">
+
+                    <details class="ut-faq-item" open>
+                        <summary>
+                            <span>Apakah saya bisa mulai dari paket gratis?</span>
+                            <span class="ut-faq-icon">+</span>
+                        </summary>
+
+                        <div class="ut-faq-answer">
+                            Bisa. Paket Gratis aktif selama 30 hari dan mencakup
+                            1 undangan, RSVP, dan buku tamu.
+                        </div>
+                    </details>
+
+
+                    <details class="ut-faq-item">
+                        <summary>
+                            <span>Apakah tema bisa dipilih sebelum mengisi undangan?</span>
+                            <span class="ut-faq-icon">+</span>
+                        </summary>
+
+                        <div class="ut-faq-answer">
+                            Bisa. Kamu dapat melihat pilihan tema terlebih dahulu,
+                            lalu lanjut mengisi data undangan dari dashboard.
+                        </div>
+                    </details>
+
+
+                    <details class="ut-faq-item">
+                        <summary>
+                            <span>Apa bedanya Premium dan Pro?</span>
+                            <span class="ut-faq-icon">+</span>
+                        </summary>
+
+                        <div class="ut-faq-answer">
+                            Premium aktif selama 365 hari dan mencakup Guest photo,
+                            Amplop digital, serta Custom domain ready. Pro mencakup
+                            semua fitur Premium, prioritas support, dan masa aktif 2 tahun.
+                        </div>
+                    </details>
+
+
+                    <details class="ut-faq-item">
+                        <summary>
+                            <span>Apakah UNDANGANTA.ID bisa dipakai untuk RSVP dan check-in?</span>
+                            <span class="ut-faq-icon">+</span>
+                        </summary>
+
+                        <div class="ut-faq-answer">
+                            Bisa. Undangan dapat digunakan untuk mengelola RSVP,
+                            daftar tamu, dan check-in tamu melalui QR.
+                        </div>
+                    </details>
+
+
+                    <details class="ut-faq-item">
+                        <summary>
+                            <span>Apakah undangan nyaman dibuka dari HP?</span>
+                            <span class="ut-faq-icon">+</span>
+                        </summary>
+
+                        <div class="ut-faq-answer">
+                            Ya. Tampilan landing page dan undangan dirancang responsif
+                            agar tetap nyaman digunakan di desktop maupun perangkat mobile.
+                        </div>
+                    </details>
+
+                </div>
+
+            </div>
 
         </div>
 
