@@ -467,6 +467,278 @@
         line-height: 1.7;
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | THEME SHOWCASE
+    |--------------------------------------------------------------------------
+    */
+
+    .ut-themes {
+        padding: 0 0 120px;
+        background: #ffffff;
+    }
+
+    .ut-themes-head {
+        display: grid;
+        grid-template-columns: minmax(0, .9fr) minmax(320px, .6fr);
+        gap: 48px;
+        align-items: end;
+        margin-bottom: 42px;
+    }
+
+    .ut-themes-head small {
+        display: block;
+        margin-bottom: 12px;
+        color: #88888e;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+    }
+
+    .ut-themes-head h2 {
+        max-width: 760px;
+        margin: 0;
+        font-size: clamp(42px, 5vw, 68px);
+        line-height: .98;
+        letter-spacing: -.055em;
+    }
+
+    .ut-themes-head p {
+        max-width: 460px;
+        margin: 0;
+        justify-self: end;
+        color: var(--ut-muted);
+        font-size: 15px;
+        line-height: 1.7;
+    }
+
+    .ut-theme-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+    .ut-theme-card {
+        position: relative;
+        min-height: 670px;
+        overflow: hidden;
+        border: 1px solid var(--ut-line);
+        border-radius: 30px;
+        background: #f7f5f1;
+        transition:
+            transform .28s ease,
+            box-shadow .28s ease,
+            border-color .28s ease;
+    }
+
+    .ut-theme-card:hover {
+        transform: translateY(-5px);
+        border-color: #d7d3cd;
+        box-shadow: 0 26px 70px rgba(34, 31, 27, .12);
+    }
+
+    .ut-theme-card-top {
+        position: relative;
+        z-index: 3;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 28px 28px 0;
+    }
+
+    .ut-theme-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+        color: #77777d;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+    }
+
+    .ut-theme-card h3 {
+        margin: 0;
+        font-size: 34px;
+        line-height: 1;
+        letter-spacing: -.045em;
+    }
+
+    .ut-theme-card-top p {
+        max-width: 330px;
+        margin: 10px 0 0;
+        color: var(--ut-muted);
+        font-size: 13px;
+        line-height: 1.55;
+    }
+
+    .ut-theme-badge {
+        flex: 0 0 auto;
+        padding: 7px 10px;
+        border: 1px solid rgba(23,23,25,.09);
+        border-radius: 999px;
+        background: rgba(255,255,255,.74);
+        color: #4f4f54;
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+    }
+
+    .ut-theme-preview {
+        position: absolute;
+        left: 50%;
+        bottom: -118px;
+        width: min(68%, 345px);
+        min-height: 500px;
+        transform: translateX(-50%) rotate(-3deg);
+        overflow: hidden;
+        border: 10px solid #19191b;
+        border-bottom-width: 30px;
+        border-radius: 34px;
+        box-shadow: 0 38px 80px rgba(44,39,34,.18);
+    }
+
+    .ut-theme-card:nth-child(2) .ut-theme-preview {
+        transform: translateX(-50%) rotate(3deg);
+    }
+
+    .ut-theme-modern {
+        background:
+            linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.7)),
+            #eee7df;
+    }
+
+    .ut-theme-classic {
+        background:
+            linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.58)),
+            #ebe1d2;
+    }
+
+    .ut-theme-mini {
+        padding: 30px 22px 24px;
+        text-align: center;
+    }
+
+    .ut-theme-mini small {
+        display: block;
+        color: #897d74;
+        font-size: 8px;
+        font-weight: 700;
+        letter-spacing: .16em;
+        text-transform: uppercase;
+    }
+
+    .ut-theme-mini-name {
+        margin-top: 18px;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 34px;
+        line-height: .95;
+        letter-spacing: -.04em;
+        color: #4f433a;
+    }
+
+    .ut-theme-modern .ut-theme-mini-name {
+        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-weight: 760;
+        color: #27272a;
+    }
+
+    .ut-theme-mini-date {
+        margin-top: 12px;
+        color: #8d8178;
+        font-size: 9px;
+    }
+
+    .ut-theme-photo {
+        position: relative;
+        margin: 22px 18px 0;
+        aspect-ratio: .82;
+        overflow: hidden;
+        border-radius: 22px;
+        background:
+            linear-gradient(150deg, #cab39f 0%, #866f5c 46%, #342d28 100%);
+    }
+
+    .ut-theme-card:nth-child(2) .ut-theme-photo {
+        background:
+            linear-gradient(150deg, #d7c5ab 0%, #8d7458 45%, #42352a 100%);
+    }
+
+    .ut-theme-photo::before,
+    .ut-theme-photo::after {
+        content: "";
+        position: absolute;
+        border-radius: 999px;
+    }
+
+    .ut-theme-photo::before {
+        width: 170px;
+        height: 250px;
+        left: -40px;
+        bottom: -95px;
+        background: rgba(255,237,217,.65);
+        transform: rotate(18deg);
+    }
+
+    .ut-theme-photo::after {
+        width: 145px;
+        height: 230px;
+        right: -35px;
+        top: 56px;
+        background: rgba(53,46,41,.58);
+        transform: rotate(-16deg);
+    }
+
+    .ut-theme-caption {
+        position: absolute;
+        left: 16px;
+        right: 16px;
+        bottom: 16px;
+        z-index: 2;
+        padding: 12px;
+        border: 1px solid rgba(255,255,255,.22);
+        border-radius: 14px;
+        background: rgba(255,255,255,.14);
+        backdrop-filter: blur(10px);
+        color: #ffffff;
+        font-size: 10px;
+        line-height: 1.45;
+    }
+
+    .ut-theme-actions {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 28px;
+    }
+
+    .ut-theme-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 46px;
+        padding: 0 18px;
+        border: 1px solid var(--ut-line);
+        border-radius: 12px;
+        background: #ffffff;
+        color: var(--ut-ink);
+        font-size: 12px;
+        font-weight: 700;
+        transition:
+            transform .2s ease,
+            border-color .2s ease;
+    }
+
+    .ut-theme-link:hover {
+        transform: translateY(-2px);
+        border-color: #cfcfcf;
+    }
+
     /*
     |--------------------------------------------------------------------------
     | FEATURE STORY
@@ -843,6 +1115,23 @@
             left: 12%;
         }
 
+        .ut-themes-head {
+            grid-template-columns: 1fr;
+            gap: 18px;
+        }
+
+        .ut-themes-head p {
+            justify-self: start;
+        }
+
+        .ut-theme-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .ut-theme-card {
+            min-height: 650px;
+        }
+
         .ut-feature {
             grid-template-columns: 1fr;
         }
@@ -960,6 +1249,42 @@
 
         .ut-statement h2 {
             font-size: 42px;
+        }
+
+        .ut-themes {
+            padding-bottom: 80px;
+        }
+
+        .ut-themes-head {
+            margin-bottom: 28px;
+        }
+
+        .ut-themes-head h2 {
+            font-size: 42px;
+        }
+
+        .ut-theme-card {
+            min-height: 560px;
+            border-radius: 22px;
+        }
+
+        .ut-theme-card-top {
+            padding: 22px 20px 0;
+        }
+
+        .ut-theme-card h3 {
+            font-size: 30px;
+        }
+
+        .ut-theme-card-top p {
+            max-width: 250px;
+            font-size: 12px;
+        }
+
+        .ut-theme-preview {
+            width: min(72%, 280px);
+            min-height: 420px;
+            bottom: -118px;
         }
 
         .ut-feature {
@@ -1228,6 +1553,190 @@
                     sampai tamu terakhir melakukan check-in,
                     UNDANGANTA.ID membantu semuanya tetap rapi.
                 </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <section class="ut-themes">
+
+        <div class="ut-container">
+
+            <div class="ut-themes-head ut-reveal">
+
+                <div>
+
+                    <small>
+                        Pilih tema
+                    </small>
+
+                    <h2>
+                        Pilih tampilan yang terasa paling kamu.
+                    </h2>
+
+                </div>
+
+                <p>
+                    Mulai dari gaya modern yang clean sampai nuansa klasik
+                    yang lebih hangat dan elegan. Lihat preview sebelum
+                    mulai mengisi undangan.
+                </p>
+
+            </div>
+
+
+            <div class="ut-theme-grid">
+
+                <article class="ut-theme-card ut-reveal">
+
+                    <div class="ut-theme-card-top">
+
+                        <div>
+
+                            <div class="ut-theme-label">
+                                Tema 01
+                            </div>
+
+                            <h3>
+                                Modern
+                            </h3>
+
+                            <p>
+                                Minimal, clean, contemporary.
+                                Cocok untuk tampilan yang ringan dan fokus ke konten.
+                            </p>
+
+                        </div>
+
+                        <div class="ut-theme-badge">
+                            Available
+                        </div>
+
+                    </div>
+
+
+                    <div class="ut-theme-preview ut-theme-modern">
+
+                        <div class="ut-theme-mini">
+
+                            <small>
+                                The Wedding Of
+                            </small>
+
+                            <div class="ut-theme-mini-name">
+                                Dims
+                                <br>
+                                & Rara
+                            </div>
+
+                            <div class="ut-theme-mini-date">
+                                18 Oktober 2026
+                            </div>
+
+                        </div>
+
+                        <div class="ut-theme-photo">
+
+                            <div class="ut-theme-caption">
+                                Save the date untuk hari istimewa kami.
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+
+                <article class="ut-theme-card ut-reveal">
+
+                    <div class="ut-theme-card-top">
+
+                        <div>
+
+                            <div class="ut-theme-label">
+                                Tema 02
+                            </div>
+
+                            <h3>
+                                Classic
+                            </h3>
+
+                            <p>
+                                Elegant, warm, timeless.
+                                Untuk nuansa yang lebih formal dan premium.
+                            </p>
+
+                        </div>
+
+                        <div class="ut-theme-badge">
+                            Premium
+                        </div>
+
+                    </div>
+
+
+                    <div class="ut-theme-preview ut-theme-classic">
+
+                        <div class="ut-theme-mini">
+
+                            <small>
+                                The Wedding Of
+                            </small>
+
+                            <div class="ut-theme-mini-name">
+                                Dims
+                                <br>
+                                & Rara
+                            </div>
+
+                            <div class="ut-theme-mini-date">
+                                18 Oktober 2026
+                            </div>
+
+                        </div>
+
+                        <div class="ut-theme-photo">
+
+                            <div class="ut-theme-caption">
+                                Dengan penuh kebahagiaan,
+                                kami mengundang Anda di hari istimewa kami.
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+            </div>
+
+
+            <div class="ut-theme-actions ut-reveal">
+
+                @auth
+
+                    <a
+                        href="{{ route('dashboard') }}"
+                        class="ut-theme-link"
+                    >
+                        Lihat tema di dashboard
+                    </a>
+
+                @else
+
+                    <a
+                        href="{{ route('register') }}"
+                        class="ut-theme-link"
+                    >
+                        Lihat semua tema
+                    </a>
+
+                @endauth
 
             </div>
 
