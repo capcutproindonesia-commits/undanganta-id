@@ -58,3 +58,4 @@ php_tests:
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
     - if: '$CI_COMMIT_BRANCH == "codex/production-sync"'
+    - if: '$CI_COMMIT_BRANCH =~ /^feature\//'
