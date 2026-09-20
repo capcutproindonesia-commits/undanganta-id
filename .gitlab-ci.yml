@@ -4,10 +4,8 @@ stages:
 variables:
   APP_ENV: testing
   APP_DEBUG: "true"
-
   DB_CONNECTION: sqlite
   DB_DATABASE: "$CI_PROJECT_DIR/database/testing.sqlite"
-
   CACHE_STORE: array
   SESSION_DRIVER: array
   QUEUE_CONNECTION: sync
@@ -16,14 +14,13 @@ variables:
 
 php_tests:
   stage: test
-
   image: php:8.3-cli
 
   before_script:
     - apt-get update
-    - apt-get install -y git unzip libzip-dev libsqlite3-dev libonig-dev
-
-    - docker-php-ext-install pdo_sqlite mbstring
+    - apt-get install -y git unzip libzip-dev libsqlite3-dev libonig-dev libpng-dev libjpeg62-turbo-dev libfreetype6-dev
+    - docker-php-ext-configure gd --with-freetype --with-jpeg
+    - docker-php-ext-install pdo_sqlite mbstring gd
 
     - mkdir -p bootstrap/cache
     - mkdir -p storage/framework/cache
@@ -46,6 +43,7 @@ php_tests:
     - php artisan key:generate
     - php artisan package:discover --ansi
     - php artisan config:clear
+    - php artisan view:clear
 
   script:
     - php artisan migrate:fresh --force
