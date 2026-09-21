@@ -511,3 +511,8 @@ Route::middleware([
             'photos.moderate'
         );
     });
+
+
+/* UNDANGANTA Studio V1 */
+require __DIR__.'/studio.php';
+
