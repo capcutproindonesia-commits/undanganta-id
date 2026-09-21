@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Invitation;
 use App\Models\Plan;
+use App\Models\StudioTemplateInstance;
+use App\Support\StudioInvitationSync;
 use App\Support\ThemeCatalog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -48,8 +50,18 @@ class InvitationController extends Controller
             $query->where('plan', 'pending');
         }
 
+        $invitations = $query->get();
+
+        $studioInstances = StudioTemplateInstance::query()
+            ->whereIn('invitation_id', $invitations->pluck('id'))
+            ->latest('id')
+            ->get()
+            ->unique('invitation_id')
+            ->keyBy('invitation_id');
+
         return view('invitations.index', [
-            'invitations' => $query->get(),
+            'invitations' => $invitations,
+            'studioInstances' => $studioInstances,
         ]);
     }
 
@@ -412,6 +424,9 @@ class InvitationController extends Controller
             false
         );
 
+        app(StudioInvitationSync::class)
+            ->syncIfAttached($invitation->fresh());
+
         return redirect()
             ->route(
                 'invitations.edit',
@@ -432,6 +447,9 @@ class InvitationController extends Controller
             ->deleteDirectory(
                 "invitations/{$invitation->id}"
             );
+
+        app(StudioInvitationSync::class)
+            ->deleteForInvitation($invitation);
 
         $invitation->delete();
 
@@ -457,6 +475,9 @@ class InvitationController extends Controller
         $invitation->update([
             'is_published' => !$invitation->is_published,
         ]);
+
+        app(StudioInvitationSync::class)
+            ->syncStatus($invitation->fresh());
 
         return back()->with(
             'ok',

@@ -531,27 +531,6 @@
         font-size:10px;
     }
 
-
-    .inv-page a:focus-visible,
-    .inv-page button:focus-visible,
-    .inv-page input:focus-visible,
-    .inv-page select:focus-visible {
-        outline: 3px solid rgba(29,29,31,.12);
-        outline-offset: 3px;
-    }
-
-    @media(prefers-reduced-motion: reduce) {
-        .inv-primary,
-        .inv-light {
-            transition: none;
-        }
-
-        .inv-primary:hover,
-        .inv-light:hover {
-            transform: none;
-        }
-    }
-
     /*
     |--------------------------------------------------------------------------
     | RESPONSIVE
@@ -696,7 +675,7 @@
             type="text"
             name="q"
             class="inv-search"
-            placeholder="Cari nama, judul, atau venue..." aria-label="Cari undangan"
+            placeholder="Cari nama, judul, atau venue..."
             value="{{ request('q') }}"
         >
 
@@ -705,7 +684,6 @@
             name="status"
             class="inv-select"
             id="invStatusFilter"
-            aria-label="Filter status undangan"
         >
 
             <option value="">
@@ -773,6 +751,7 @@
                 $order = $invitation->latestOrder;
                 $needsActivation = $invitation->plan === 'pending';
                 $orderStatus = $order?->status ?? 'draft';
+                $studioInstance = $studioInstances->get($invitation->id);
             @endphp
 
             <div class="inv-row">
@@ -937,19 +916,59 @@
 
                     @else
 
-                        <a
-                            href="{{ route(
-                                'invitations.edit',
-                                $invitation
-                            ) }}"
-                            class="inv-primary"
-                            style="
-                                min-height:34px;
-                                padding:0 13px;
-                            "
-                        >
-                            Edit
-                        </a>
+                        @if($studioInstance)
+
+                            <a
+                                href="{{ route(
+                                    'studio.invitation.open',
+                                    $invitation
+                                ) }}"
+                                class="inv-primary"
+                                style="
+                                    min-height:34px;
+                                    padding:0 13px;
+                                "
+                            >
+                                Edit Studio
+                            </a>
+
+                            <a
+                                href="{{ route(
+                                    'invitations.edit',
+                                    $invitation
+                                ) }}"
+                                class="inv-light"
+                            >
+                                Konten
+                            </a>
+
+                        @else
+
+                            <a
+                                href="{{ route(
+                                    'invitations.edit',
+                                    $invitation
+                                ) }}"
+                                class="inv-primary"
+                                style="
+                                    min-height:34px;
+                                    padding:0 13px;
+                                "
+                            >
+                                Edit
+                            </a>
+
+                            <a
+                                href="{{ route(
+                                    'studio.invitation.manage',
+                                    $invitation
+                                ) }}"
+                                class="inv-light"
+                            >
+                                Studio
+                            </a>
+
+                        @endif
 
 
                         <a
@@ -966,14 +985,33 @@
                         @if($invitation->is_published)
 
                             <a
-                                href="{{ route(
-                                    'public.invitation',
-                                    $invitation->slug
-                                ) }}"
+                                href="{{ $studioInstance
+                                    ? route(
+                                        'studio.public.show',
+                                        $studioInstance->public_token
+                                    )
+                                    : route(
+                                        'public.invitation',
+                                        $invitation->slug
+                                    )
+                                }}"
                                 target="_blank"
                                 class="inv-light"
                             >
                                 Preview
+                            </a>
+
+                        @elseif($studioInstance)
+
+                            <a
+                                href="{{ route(
+                                    'studio.invitation.preview',
+                                    $invitation
+                                ) }}"
+                                target="_blank"
+                                class="inv-light"
+                            >
+                                Preview Draft
                             </a>
 
                         @endif
