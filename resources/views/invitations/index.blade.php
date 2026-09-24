@@ -206,7 +206,7 @@
 
     .inv-tools {
         display:grid;
-        grid-template-columns:minmax(0,1fr) 170px;
+        grid-template-columns:minmax(0,1fr) 170px auto;
 
         align-items:center;
 
@@ -668,7 +668,6 @@
         method="GET"
         action="{{ route('invitations.index') }}"
         class="inv-tools"
-        id="invFilterForm"
     >
 
         <input
@@ -683,7 +682,6 @@
         <select
             name="status"
             class="inv-select"
-            id="invStatusFilter"
         >
 
             <option value="">
@@ -713,6 +711,13 @@
 
         </select>
 
+
+        <button
+            type="submit"
+            class="inv-filter-btn"
+        >
+            Cari
+        </button>
 
     </form>
 
@@ -751,7 +756,6 @@
                 $order = $invitation->latestOrder;
                 $needsActivation = $invitation->plan === 'pending';
                 $orderStatus = $order?->status ?? 'draft';
-                $studioInstance = $studioInstances->get($invitation->id);
             @endphp
 
             <div class="inv-row">
@@ -916,66 +920,27 @@
 
                     @else
 
-                        @if($studioInstance)
-
+                        @if($invitation->studio_template_id)
                             <a
-                                href="{{ route(
-                                    'studio.invitation.open',
-                                    $invitation
-                                ) }}"
+                                href="{{ route('studio.invitation.open', $invitation) }}"
                                 class="inv-primary"
-                                style="
-                                    min-height:34px;
-                                    padding:0 13px;
-                                "
+                                style="min-height:34px;padding:0 13px;"
                             >
                                 Edit Studio
                             </a>
-
-                            <a
-                                href="{{ route(
-                                    'invitations.edit',
-                                    $invitation
-                                ) }}"
-                                class="inv-light"
-                            >
-                                Konten
-                            </a>
-
                         @else
-
                             <a
-                                href="{{ route(
-                                    'invitations.edit',
-                                    $invitation
-                                ) }}"
+                                href="{{ route('invitations.edit', $invitation) }}"
                                 class="inv-primary"
-                                style="
-                                    min-height:34px;
-                                    padding:0 13px;
-                                "
+                                style="min-height:34px;padding:0 13px;"
                             >
                                 Edit
                             </a>
-
-                            <a
-                                href="{{ route(
-                                    'studio.invitation.manage',
-                                    $invitation
-                                ) }}"
-                                class="inv-light"
-                            >
-                                Studio
-                            </a>
-
                         @endif
 
 
                         <a
-                            href="{{ route(
-                                'guests.index',
-                                $invitation
-                            ) }}"
+                            href="{{ route('guests.index', $invitation) }}"
                             class="inv-light"
                         >
                             Tamu
@@ -983,37 +948,16 @@
 
 
                         @if($invitation->is_published)
-
                             <a
-                                href="{{ $studioInstance
-                                    ? route(
-                                        'studio.public.show',
-                                        $studioInstance->public_token
-                                    )
-                                    : route(
-                                        'public.invitation',
-                                        $invitation->slug
-                                    )
+                                href="{{ $invitation->studio_template_id
+                                    ? route('studio.invitation.preview', $invitation)
+                                    : route('public.invitation', $invitation->slug)
                                 }}"
                                 target="_blank"
                                 class="inv-light"
                             >
                                 Preview
                             </a>
-
-                        @elseif($studioInstance)
-
-                            <a
-                                href="{{ route(
-                                    'studio.invitation.preview',
-                                    $invitation
-                                ) }}"
-                                target="_blank"
-                                class="inv-light"
-                            >
-                                Preview Draft
-                            </a>
-
                         @endif
 
                     @endif
@@ -1053,21 +997,5 @@
     </section>
 
 </div>
-
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const filterForm = document.getElementById('invFilterForm');
-        const statusFilter = document.getElementById('invStatusFilter');
-
-        if (!filterForm || !statusFilter) {
-            return;
-        }
-
-        statusFilter.addEventListener('change', function () {
-            filterForm.submit();
-        });
-    });
-</script>
 
 @endsection

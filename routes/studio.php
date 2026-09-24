@@ -1,8 +1,9 @@
 <?php
 
 use App\Http\Controllers\Admin\StudioController;
-use App\Http\Controllers\StudioPublicController;
+use App\Http\Controllers\StudioCustomerController;
 use App\Http\Controllers\StudioInvitationController;
+use App\Http\Controllers\StudioPublicController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'admin'])
@@ -31,8 +32,12 @@ Route::middleware(['auth'])
     ->prefix('studio/customer')
     ->name('studio.customer.')
     ->group(function () {
-        Route::get('/instances/{instance}', [StudioController::class, 'customerEdit'])->name('edit');
-        Route::put('/instances/{instance}', [StudioController::class, 'customerUpdate'])->name('update');
+        Route::get('/instances/{instance}', [StudioCustomerController::class, 'edit'])->name('edit');
+        Route::put('/instances/{instance}/quick', [StudioCustomerController::class, 'quickUpdate'])->name('quick.update');
+        Route::put('/instances/{instance}/full', [StudioCustomerController::class, 'fullUpdate'])->name('full.update');
+        Route::post('/instances/{instance}/media', [StudioCustomerController::class, 'mediaUpload'])->name('media.upload');
+        Route::post('/instances/{instance}/assets', [StudioCustomerController::class, 'assetUpload'])->name('assets.upload');
+        Route::post('/instances/{instance}/fonts', [StudioCustomerController::class, 'fontUpload'])->name('fonts.upload');
     });
 
 Route::get('/i/{token}', [StudioPublicController::class, 'show'])
@@ -55,6 +60,11 @@ Route::get('/i/{token}/fonts/{font}/file', [StudioPublicController::class, 'font
     ->where('token', '[A-Za-z0-9]{32,64}')
     ->name('studio.public.font');
 
+Route::get('/i/{token}/media/{key}', [StudioPublicController::class, 'media'])
+    ->where('token', '[A-Za-z0-9]{32,64}')
+    ->where('key', '[A-Za-z0-9_]+')
+    ->name('studio.public.media');
+
 Route::middleware(['auth'])
     ->prefix('invitations/{invitation}/studio')
     ->name('studio.invitation.')
@@ -65,4 +75,3 @@ Route::middleware(['auth'])
         Route::get('/preview', [StudioInvitationController::class, 'preview'])->name('preview');
         Route::delete('/', [StudioInvitationController::class, 'detach'])->name('detach');
     });
-

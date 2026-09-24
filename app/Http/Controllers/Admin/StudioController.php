@@ -7,6 +7,7 @@ use App\Models\CustomFont;
 use App\Models\StudioAsset;
 use App\Models\StudioTemplate;
 use App\Models\StudioTemplateInstance;
+use App\Support\StudioBindingSchema;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -162,6 +163,48 @@ class StudioController extends Controller
         }
 
         $type = in_array($ext, $videoExtensions, true) ? 'video' : 'image';
+        $size = $file->getSize() ?: 0;
+        $hash = hash_file('sha256', $file->getRealPath());
+
+        $existing = StudioAsset::query()
+            ->where('studio_template_id', $template->id)
+            ->where('type', $type)
+            ->where('size', $size)
+            ->get()
+            ->first(function (StudioAsset $candidate) use ($hash) {
+                $storedHash = data_get($candidate->metadata, 'sha256');
+
+                if (is_string($storedHash) && hash_equals($storedHash, $hash)) {
+                    return true;
+                }
+
+                $candidatePath = Storage::disk('public')->path($candidate->path);
+
+                return is_file($candidatePath)
+                    && hash_equals(hash_file('sha256', $candidatePath), $hash);
+            });
+
+        if ($existing) {
+            $metadata = is_array($existing->metadata) ? $existing->metadata : [];
+            if (($metadata['sha256'] ?? null) !== $hash) {
+                $metadata['sha256'] = $hash;
+                $existing->forceFill(['metadata' => $metadata])->save();
+            }
+
+            return response()->json([
+                'ok' => true,
+                'duplicate' => true,
+                'asset' => [
+                    'id' => $existing->id,
+                    'type' => $existing->type,
+                    'name' => $existing->name,
+                    'size' => (int) $existing->size,
+                    'sha256' => $hash,
+                    'url' => route('admin.studio.assets.file', $existing),
+                ],
+            ]);
+        }
+
         $path = $file->store('studio/assets', 'public');
 
         $asset = StudioAsset::create([
@@ -170,17 +213,20 @@ class StudioController extends Controller
             'name' => $file->getClientOriginalName(),
             'path' => $path,
             'mime' => $file->getMimeType(),
-            'size' => $file->getSize() ?: 0,
-            'metadata' => [],
+            'size' => $size,
+            'metadata' => ['sha256' => $hash],
             'created_by' => auth()->id(),
         ]);
 
         return response()->json([
             'ok' => true,
+            'duplicate' => false,
             'asset' => [
                 'id' => $asset->id,
                 'type' => $asset->type,
                 'name' => $asset->name,
+                'size' => (int) $asset->size,
+                'sha256' => $hash,
                 'url' => route('admin.studio.assets.file', $asset),
             ],
         ]);
@@ -372,10 +418,10 @@ class StudioController extends Controller
             'groom_name', 'bride_name', 'couple_names', 'event_date',
             'venue_name', 'quote', 'prayer', 'opening_text', 'closing_text',
         ];
-        $allowedMedia = [
-            'groom_photo', 'bride_photo', 'couple_photo',
-            'gallery_1', 'gallery_2', 'gallery_3',
-        ];
+        $allowedMedia = array_merge(
+            ['groom_photo', 'bride_photo', 'couple_photo'],
+            StudioBindingSchema::galleryKeys()
+        );
 
         $data = $request->validate([
             'content' => ['required', 'array'],
@@ -434,16 +480,24 @@ class StudioController extends Controller
             'couple_names' => '',
             'event_date' => '',
             'venue_name' => '',
+            'venue_address' => '',
+            'maps_url' => '',
             'quote' => '',
             'prayer' => '',
             'opening_text' => '',
             'closing_text' => '',
+            'story' => '',
+            'music_url' => '',
+            'gift_bank' => '',
+            'gift_number' => '',
+            'gift_name' => '',
             'groom_photo' => null,
             'bride_photo' => null,
             'couple_photo' => null,
-            'gallery_1' => null,
-            'gallery_2' => null,
-            'gallery_3' => null,
+            'gallery' => [],
+            ...array_fill_keys(StudioBindingSchema::galleryKeys(), null),
+            'opening_cover_media' => null,
+            'desktop_cover_media' => null,
         ];
     }
 
@@ -571,7 +625,9 @@ class StudioController extends Controller
 
         $allowedText = [
             'groom_name', 'bride_name', 'couple_names', 'event_date',
-            'venue_name', 'quote', 'prayer', 'opening_text', 'closing_text',
+            'venue_name', 'venue_address', 'maps_url', 'quote', 'prayer',
+            'opening_text', 'closing_text', 'story', 'music_url',
+            'gift_bank', 'gift_number', 'gift_name',
         ];
 
         $content = array_merge($this->emptyCustomerContent(), $instance->content ?? []);
@@ -638,14 +694,163 @@ class StudioController extends Controller
             'design_overrides' => $overrides,
             'meta' => array_merge($instance->meta ?? [], [
                 'customer_editor_updated_at' => now()->toIso8601String(),
+                'customer_editor_version' => '2.4',
             ]),
         ]);
+
+        $this->syncCustomerContentToInvitation($instance->fresh(), $content);
 
         return response()->json([
             'ok' => true,
             'saved_at' => now()->format('H:i:s'),
             'instance' => $this->instancePayload($instance->fresh()),
         ]);
+    }
+
+    public function customerMediaUpload(Request $request, StudioTemplateInstance $instance): JsonResponse
+    {
+        abort_unless((int) $instance->owner_id === (int) auth()->id(), 403);
+
+        $data = $request->validate([
+            'key' => ['required', Rule::in(array_merge(
+                ['groom_photo', 'bride_photo', 'couple_photo'],
+                StudioBindingSchema::galleryKeys(),
+                ['opening_cover_media', 'desktop_cover_media'],
+            ))],
+            'file' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,gif', 'max:10240'],
+        ]);
+
+        $invitationId = (int) ($instance->invitation_id ?? 0);
+        $folder = $invitationId > 0
+            ? "invitations/{$invitationId}/studio"
+            : "studio/customer/{$instance->id}";
+
+        $path = $request->file('file')->store($folder, 'public');
+        $value = [
+            'url' => Storage::disk('public')->url($path),
+            'path' => $path,
+            'name' => $request->file('file')->getClientOriginalName(),
+        ];
+
+        $content = array_merge($this->emptyCustomerContent(), $instance->content ?? []);
+        $content[$data['key']] = $value;
+
+        if (preg_match('/^gallery_(\d+)$/', $data['key'], $match)) {
+            $index = max(0, ((int) $match[1]) - 1);
+            $gallery = is_array($content['gallery'] ?? null)
+                ? array_values($content['gallery'])
+                : [];
+
+            if (count($gallery) <= $index) {
+                $gallery = array_pad($gallery, $index + 1, null);
+            }
+
+            $gallery[$index] = $value;
+            $content['gallery'] = $gallery;
+        }
+
+        $instance->update([
+            'content' => $content,
+            'meta' => array_merge($instance->meta ?? [], [
+                'customer_media_updated_at' => now()->toIso8601String(),
+            ]),
+        ]);
+
+        $this->syncCustomerContentToInvitation($instance->fresh(), $content);
+
+        return response()->json([
+            'ok' => true,
+            'key' => $data['key'],
+            'media' => $value,
+            'content' => $content,
+        ]);
+    }
+
+    private function syncCustomerContentToInvitation(StudioTemplateInstance $instance, array $content): void
+    {
+        if (!$instance->invitation_id) {
+            return;
+        }
+
+        $invitation = \App\Models\Invitation::query()->find($instance->invitation_id);
+
+        if (!$invitation || (int) $invitation->user_id !== (int) $instance->owner_id) {
+            return;
+        }
+
+        $update = [
+            'groom_name' => $content['groom_name'] ?: $invitation->groom_name,
+            'bride_name' => $content['bride_name'] ?: $invitation->bride_name,
+            'venue_name' => $content['venue_name'] ?: $invitation->venue_name,
+            'venue_address' => $content['venue_address'] ?: null,
+            'maps_url' => $content['maps_url'] ?: null,
+            'quote' => $content['quote'] ?: null,
+            'story' => $content['story'] ?: null,
+            'music_url' => $content['music_url'] ?: null,
+        ];
+
+        if (!empty($content['event_date'])) {
+            $update['event_date'] = $content['event_date'];
+        }
+
+        if (!empty($content['groom_photo']['path'])) {
+            $update['groom_photo_path'] = $content['groom_photo']['path'];
+        }
+
+        if (!empty($content['bride_photo']['path'])) {
+            $update['bride_photo_path'] = $content['bride_photo']['path'];
+        }
+
+        $gallerySlots = array_fill(0, StudioBindingSchema::galleryCapacity(), null);
+
+        if (is_array($content['gallery'] ?? null)) {
+            foreach (array_slice($content['gallery'], 0, StudioBindingSchema::galleryCapacity()) as $index => $item) {
+                if (is_array($item) && !empty($item['path'])) {
+                    $gallerySlots[$index] = $item['path'];
+                }
+            }
+        }
+
+        foreach (StudioBindingSchema::galleryKeys() as $index => $key) {
+            if (!empty($content[$key]['path'])) {
+                $gallerySlots[$index] = $content[$key]['path'];
+            }
+        }
+
+        $gallery = array_values(array_filter(
+            $gallerySlots,
+            static fn ($path) => is_string($path) && $path !== ''
+        ));
+
+        if ($gallery !== []) {
+            $update['gallery'] = $gallery;
+        }
+
+        if (
+            ($content['gift_bank'] ?? '') !== ''
+            || ($content['gift_number'] ?? '') !== ''
+            || ($content['gift_name'] ?? '') !== ''
+        ) {
+            $update['gift_accounts'] = [[
+                'bank' => $content['gift_bank'] ?? '',
+                'number' => $content['gift_number'] ?? '',
+                'name' => $content['gift_name'] ?? '',
+            ]];
+        }
+
+        $sections = $invitation->sections ?? [];
+        $defaults = ['countdown', 'quote', 'groom', 'bride', 'story', 'gallery', 'event', 'rsvp', 'gift', 'guest_photo', 'wishes', 'music'];
+        if (!isset($sections['order']) || !is_array($sections['order'])) {
+            $sections['order'] = $defaults;
+        }
+        foreach ($defaults as $section) {
+            if (!array_key_exists($section, $sections)) {
+                $sections[$section] = true;
+            }
+        }
+        $update['sections'] = $sections;
+
+        $invitation->forceFill($update)->save();
     }
 
 

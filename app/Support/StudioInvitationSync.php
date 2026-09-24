@@ -34,9 +34,21 @@ class StudioInvitationSync
         StudioTemplateInstance $instance
     ): StudioTemplateInstance {
         $existing = $instance->content ?? [];
+
+        // Full Studio instance content is canonical after it has been seeded.
+        // Remove only the legacy couple_photo value that is provably the old
+        // cover_path alias; do not delete a real dedicated couple_photo value.
+        $legacyCoverPath = trim((string) ($invitation->cover_path ?? ''));
+        $existingCouple = $existing['couple_photo'] ?? null;
+        $existingCouplePath = is_array($existingCouple)
+            ? trim((string) ($existingCouple['path'] ?? ''))
+            : (is_string($existingCouple) ? trim($existingCouple) : '');
+        if ($legacyCoverPath !== '' && $existingCouplePath !== '' && $existingCouplePath === $legacyCoverPath) {
+            unset($existing['couple_photo']);
+        }
         $gallery = $this->normalizeGallery($invitation->gallery ?? []);
 
-        $content = array_merge($existing, [
+        $content = array_merge([
             'groom_name' => (string) ($invitation->groom_name ?? ''),
             'bride_name' => (string) ($invitation->bride_name ?? ''),
             'couple_names' => trim(
@@ -49,19 +61,20 @@ class StudioInvitationSync
                 : '',
             'venue_name' => (string) ($invitation->venue_name ?? ''),
             'quote' => (string) ($invitation->quote ?? ''),
+            /* UNDANGANTA_DATA_BINDING_MEDIA_PRESERVE_V1 */
             'groom_photo' => $this->media(
                 $invitation->groom_photo_path ?? null
-            ),
+            ) ?: ($existing['groom_photo'] ?? null),
             'bride_photo' => $this->media(
                 $invitation->bride_photo_path ?? null
-            ),
-            'couple_photo' => $this->media(
-                $invitation->cover_path ?? null
-            ),
-            'gallery_1' => $this->media($gallery[0] ?? null),
-            'gallery_2' => $this->media($gallery[1] ?? null),
-            'gallery_3' => $this->media($gallery[2] ?? null),
-        ]);
+            ) ?: ($existing['bride_photo'] ?? null),
+            'couple_photo' => null,
+            'gallery' => array_values(array_filter(array_map(
+                fn ($path) => $this->media($path),
+                $gallery
+            ))),
+            ...$this->galleryAliases($gallery),
+        ], $existing);
 
         $instance->forceFill([
             'owner_id' => $invitation->user_id,
@@ -107,6 +120,17 @@ class StudioInvitationSync
             'url' => url('/storage/' . ltrim($path, '/')),
             'name' => basename($path),
         ];
+    }
+
+    private function galleryAliases(array $gallery): array
+    {
+        $aliases = [];
+
+        foreach (StudioBindingSchema::galleryKeys() as $offset => $key) {
+            $aliases[$key] = $this->media($gallery[$offset] ?? null);
+        }
+
+        return $aliases;
     }
 
     private function normalizeGallery(array $gallery): array

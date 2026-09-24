@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\GuestPhoto;
 use App\Models\Invitation;
 use App\Models\Plan;
+use App\Models\StudioTemplate;
 use App\Models\User;
 use App\Models\Wish;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -18,9 +19,8 @@ class ProductionFeatureTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
-    private Plan $freePlan;
     private Plan $premiumPlan;
-    private Plan $proPlan;
+    private Plan $royalPlan;
 
     protected function setUp(): void
     {
@@ -28,16 +28,7 @@ class ProductionFeatureTest extends TestCase
 
         $this->user = User::factory()->create();
 
-        $this->freePlan = Plan::query()->create([
-            'name' => 'Free',
-            'code' => 'free',
-            'price' => 0,
-            'duration_days' => 365,
-            'features' => null,
-            'is_active' => true,
-        ]);
-
-        $this->premiumPlan = Plan::query()->create([
+        $this->premiumPlan = Plan::query()->updateOrCreate(['code' => 'premium'], [
             'name' => 'Premium',
             'code' => 'premium',
             'price' => 100000,
@@ -46,14 +37,41 @@ class ProductionFeatureTest extends TestCase
             'is_active' => true,
         ]);
 
-        $this->proPlan = Plan::query()->create([
-            'name' => 'Pro',
-            'code' => 'pro',
+        $this->royalPlan = Plan::query()->updateOrCreate(['code' => 'royal'], [
+            'name' => 'Royal',
+            'code' => 'royal',
             'price' => 200000,
             'duration_days' => 365,
             'features' => null,
             'is_active' => true,
         ]);
+    }
+
+    private function makeStudioTemplate(string $minimumPlan, bool $blank = false): StudioTemplate
+    {
+        return StudioTemplate::create([
+            'name' => 'Studio ' . ucfirst($minimumPlan),
+            'slug' => 'test-studio-' . uniqid(),
+            'status' => 'published',
+            'min_plan' => $minimumPlan,
+            'canvas' => ['pages' => []],
+            'settings' => $blank ? ['system_blank' => true] : [],
+        ]);
+    }
+
+    private function studioOrderPayload(string $plan, StudioTemplate $template): array
+    {
+        return [
+            'selected_plan' => $plan,
+            'studio_template_id' => $template->id,
+            'title' => 'Studio Test',
+            'slug' => 'studio-test-' . uniqid(),
+            'groom_name' => 'A',
+            'bride_name' => 'B',
+            'event_date' => now()->addMonth()->format('Y-m-d H:i:s'),
+            'venue_name' => 'Makassar',
+            'venue_address' => 'Makassar',
+        ];
     }
 
     private function makeInvitation(array $overrides = []): Invitation
@@ -264,232 +282,100 @@ class ProductionFeatureTest extends TestCase
         );
     }
 
-    public function test_free_plan_can_create_modern_theme(): void
+    public function test_legacy_free_plan_is_rejected_for_new_invitations(): void
     {
-        $response = $this
-            ->actingAs($this->user)
-            ->post(
-                route('invitations.store'),
-                [
-                    'selected_plan' => 'free',
-                    'theme' => 'modern',
-                    'title' => 'Free Modern',
-                    'slug' => 'free-modern-test',
-                    'groom_name' => 'A',
-                    'bride_name' => 'B',
-                    'event_date' => now()
-                        ->addMonth()
-                        ->format('Y-m-d H:i:s'),
-                    'venue_name' => 'Makassar',
-                    'venue_address' => 'Makassar',
-                ]
-            );
+        $template = $this->makeStudioTemplate('basic');
+        $payload = $this->studioOrderPayload('free', $template);
 
-        $response->assertRedirect();
+        $this->actingAs($this->user)
+            ->postJson(route('invitations.store'), $payload)
+            ->assertUnprocessable();
 
-        $this->assertDatabaseHas(
-            'invitations',
-            [
-                'slug' => 'free-modern-test',
-                'theme' => 'modern',
-                'plan' => 'free',
-            ]
-        );
+        $this->assertDatabaseMissing('invitations', ['slug' => $payload['slug']]);
     }
 
-    public function test_free_plan_cannot_create_minimal_theme(): void
+    public function test_basic_plan_creates_pending_invitation_and_order_with_studio_template(): void
     {
-        $response = $this
-            ->actingAs($this->user)
-            ->post(
-                route('invitations.store'),
-                [
-                    'selected_plan' => 'free',
-                    'theme' => 'minimal',
-                    'title' => 'Free Minimal',
-                    'slug' => 'free-minimal-test',
-                    'groom_name' => 'A',
-                    'bride_name' => 'B',
-                    'event_date' => now()
-                        ->addMonth()
-                        ->format('Y-m-d H:i:s'),
-                    'venue_name' => 'Makassar',
-                    'venue_address' => 'Makassar',
-                ]
-            );
+        $template = $this->makeStudioTemplate('basic');
+        $payload = $this->studioOrderPayload('basic', $template);
 
-        $response->assertStatus(422);
+        $this->actingAs($this->user)
+            ->post(route('invitations.store'), $payload)
+            ->assertRedirect();
 
-        $this->assertDatabaseMissing(
-            'invitations',
-            [
-                'slug' => 'free-minimal-test',
-            ]
-        );
+        $invitation = Invitation::where('slug', $payload['slug'])->firstOrFail();
+        $this->assertSame('pending', $invitation->plan);
+        $this->assertSame($template->id, $invitation->studio_template_id);
+        $this->assertDatabaseHas('orders', [
+            'user_id' => $this->user->id,
+            'invitation_id' => $invitation->id,
+            'plan_id' => Plan::where('code', 'basic')->firstOrFail()->id,
+            'status' => 'draft',
+        ]);
     }
 
-    public function test_free_plan_cannot_create_classic_theme(): void
+    public function test_basic_plan_cannot_select_blank_canvas(): void
     {
-        $response = $this
-            ->actingAs($this->user)
-            ->post(
-                route('invitations.store'),
-                [
-                    'selected_plan' => 'free',
-                    'theme' => 'classic',
-                    'title' => 'Free Classic',
-                    'slug' => 'free-classic-test',
-                    'groom_name' => 'A',
-                    'bride_name' => 'B',
-                    'event_date' => now()
-                        ->addMonth()
-                        ->format('Y-m-d H:i:s'),
-                    'venue_name' => 'Makassar',
-                    'venue_address' => 'Makassar',
-                ]
-            );
+        $template = $this->makeStudioTemplate('basic', blank: true);
+        $payload = $this->studioOrderPayload('basic', $template);
 
-        $response->assertStatus(422);
+        $this->actingAs($this->user)
+            ->post(route('invitations.store'), $payload)
+            ->assertForbidden();
 
-        $this->assertDatabaseMissing(
-            'invitations',
-            [
-                'slug' => 'free-classic-test',
-            ]
-        );
+        $this->assertDatabaseMissing('invitations', ['slug' => $payload['slug']]);
     }
 
-    public function test_premium_plan_can_create_classic_theme(): void
+    public function test_premium_plan_can_select_premium_template(): void
     {
-        $response = $this
-            ->actingAs($this->user)
-            ->post(
-                route('invitations.store'),
-                [
-                    'selected_plan' => 'premium',
-                    'theme' => 'classic',
-                    'title' => 'Premium Classic',
-                    'slug' => 'premium-classic-test',
-                    'groom_name' => 'A',
-                    'bride_name' => 'B',
-                    'event_date' => now()
-                        ->addMonth()
-                        ->format('Y-m-d H:i:s'),
-                    'venue_name' => 'Makassar',
-                    'venue_address' => 'Makassar',
-                ]
-            );
+        $template = $this->makeStudioTemplate('premium');
+        $payload = $this->studioOrderPayload('premium', $template);
 
-        $response->assertRedirect();
+        $this->actingAs($this->user)
+            ->post(route('invitations.store'), $payload)
+            ->assertRedirect();
 
-        $invitation = Invitation::query()
-            ->where(
-                'slug',
-                'premium-classic-test'
-            )
-            ->firstOrFail();
-
-        $this->assertSame(
-            'classic',
-            $invitation->theme
-        );
-
-        $this->assertSame(
-            'pending',
-            $invitation->plan
-        );
-
-        $this->assertDatabaseHas(
-            'orders',
-            [
-                'user_id' => $this->user->id,
-                'invitation_id' => $invitation->id,
-                'plan_id' => $this->premiumPlan->id,
-                'status' => 'draft',
-            ]
-        );
+        $invitation = Invitation::where('slug', $payload['slug'])->firstOrFail();
+        $this->assertSame('pending', $invitation->plan);
+        $this->assertSame($template->id, $invitation->studio_template_id);
+        $this->assertDatabaseHas('orders', [
+            'user_id' => $this->user->id,
+            'invitation_id' => $invitation->id,
+            'plan_id' => $this->premiumPlan->id,
+            'status' => 'draft',
+        ]);
     }
 
-    public function test_premium_plan_cannot_create_pro_only_floral_theme(): void
+    public function test_premium_plan_cannot_select_royal_template(): void
     {
-        $response = $this
-            ->actingAs($this->user)
-            ->post(
-                route('invitations.store'),
-                [
-                    'selected_plan' => 'premium',
-                    'theme' => 'floral',
-                    'title' => 'Premium Floral',
-                    'slug' => 'premium-floral-test',
-                    'groom_name' => 'A',
-                    'bride_name' => 'B',
-                    'event_date' => now()
-                        ->addMonth()
-                        ->format('Y-m-d H:i:s'),
-                    'venue_name' => 'Makassar',
-                    'venue_address' => 'Makassar',
-                ]
-            );
+        $template = $this->makeStudioTemplate('royal');
+        $payload = $this->studioOrderPayload('premium', $template);
 
-        $response->assertStatus(422);
+        $this->actingAs($this->user)
+            ->post(route('invitations.store'), $payload)
+            ->assertStatus(422);
 
-        $this->assertDatabaseMissing(
-            'invitations',
-            [
-                'slug' => 'premium-floral-test',
-            ]
-        );
+        $this->assertDatabaseMissing('invitations', ['slug' => $payload['slug']]);
     }
 
-    public function test_pro_plan_can_create_floral_theme(): void
+    public function test_royal_plan_can_select_royal_template(): void
     {
-        $response = $this
-            ->actingAs($this->user)
-            ->post(
-                route('invitations.store'),
-                [
-                    'selected_plan' => 'pro',
-                    'theme' => 'floral',
-                    'title' => 'Pro Floral',
-                    'slug' => 'pro-floral-test',
-                    'groom_name' => 'A',
-                    'bride_name' => 'B',
-                    'event_date' => now()
-                        ->addMonth()
-                        ->format('Y-m-d H:i:s'),
-                    'venue_name' => 'Makassar',
-                    'venue_address' => 'Makassar',
-                ]
-            );
+        $template = $this->makeStudioTemplate('royal');
+        $payload = $this->studioOrderPayload('royal', $template);
 
-        $response->assertRedirect();
+        $this->actingAs($this->user)
+            ->post(route('invitations.store'), $payload)
+            ->assertRedirect();
 
-        $invitation = Invitation::query()
-            ->where(
-                'slug',
-                'pro-floral-test'
-            )
-            ->firstOrFail();
-
-        $this->assertSame(
-            'floral',
-            $invitation->theme
-        );
-
-        $this->assertSame(
-            'pending',
-            $invitation->plan
-        );
-
-        $this->assertDatabaseHas(
-            'orders',
-            [
-                'user_id' => $this->user->id,
-                'invitation_id' => $invitation->id,
-                'plan_id' => $this->proPlan->id,
-                'status' => 'draft',
-            ]
-        );
+        $invitation = Invitation::where('slug', $payload['slug'])->firstOrFail();
+        $this->assertSame('pending', $invitation->plan);
+        $this->assertSame($template->id, $invitation->studio_template_id);
+        $this->assertDatabaseHas('orders', [
+            'user_id' => $this->user->id,
+            'invitation_id' => $invitation->id,
+            'plan_id' => $this->royalPlan->id,
+            'status' => 'draft',
+        ]);
     }
 
     public function test_published_invitation_slug_is_locked_during_update(): void

@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Invitation;
 use App\Models\Plan;
-use App\Models\StudioTemplateInstance;
-use App\Support\StudioInvitationSync;
+use App\Models\StudioTemplate;
 use App\Support\ThemeCatalog;
+use App\Support\PlanCapabilities;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -50,18 +50,8 @@ class InvitationController extends Controller
             $query->where('plan', 'pending');
         }
 
-        $invitations = $query->get();
-
-        $studioInstances = StudioTemplateInstance::query()
-            ->whereIn('invitation_id', $invitations->pluck('id'))
-            ->latest('id')
-            ->get()
-            ->unique('invitation_id')
-            ->keyBy('invitation_id');
-
         return view('invitations.index', [
-            'invitations' => $invitations,
-            'studioInstances' => $studioInstances,
+            'invitations' => $query->get(),
         ]);
     }
 
@@ -70,51 +60,78 @@ class InvitationController extends Controller
         return view('invitations.plans', [
             'plans' => Plan::query()
                 ->where('is_active', true)
+                ->whereIn('code', ['basic', 'premium', 'royal'])
                 ->orderBy('price')
                 ->get(),
-            'themeAccess' => collect(config('themes.plans', []))
-                ->mapWithKeys(fn ($rank, $code) => [
-                    $code => ThemeCatalog::allowedForPlan($code),
-                ])
-                ->all(),
         ]);
     }
 
     public function themes(Request $request)
     {
-        $plan = $this->selectedPlan(
-            (string) $request->query('plan')
-        );
+        $plan = $this->selectedPlan((string) $request->query('plan'));
+
+        $templates = StudioTemplate::query()
+            ->where('status', 'published')
+            ->where('slug', '!=', '__system-blank-canvas')
+            ->orderBy('name')
+            ->get()
+            ->filter(fn (StudioTemplate $template) =>
+                PlanCapabilities::templateAllowed(
+                    (string) $plan->code,
+                    (string) $template->min_plan
+                )
+            )
+            ->values();
 
         return view('invitations.themes', [
             'plan' => $plan,
-            'themes' => ThemeCatalog::active(),
-            'allowedThemes' => ThemeCatalog::allowedForPlan($plan->code),
+            'templates' => $templates,
+            'blankAllowed' => PlanCapabilities::blankAllowed((string) $plan->code),
         ]);
     }
 
     public function initial(Request $request)
     {
-        $plan = $this->selectedPlan(
-            (string) $request->query('plan')
-        );
+        $plan = $this->selectedPlan((string) $request->query('plan'));
+        $choice = (string) $request->query('template');
 
-        $theme = strtolower(
-            (string) $request->query('theme')
-        );
+        if ($choice === 'blank') {
+            abort_unless(
+                PlanCapabilities::blankAllowed((string) $plan->code),
+                403,
+                'Blank canvas hanya tersedia untuk Premium / Intimate dan Royal.'
+            );
 
-        if (!$this->themeAllowed($plan->code, $theme)) {
-            return redirect()
-                ->route('invitations.themes', ['plan' => $plan->code])
-                ->withErrors([
-                    'theme' => 'Tema ini tidak tersedia untuk paket yang dipilih.',
-                ]);
+            $template = StudioTemplate::query()
+                ->where('slug', '__system-blank-canvas')
+                ->where('status', 'published')
+                ->firstOrFail();
+        } else {
+            $template = StudioTemplate::query()
+                ->whereKey((int) $choice)
+                ->where('status', 'published')
+                ->where('slug', '!=', '__system-blank-canvas')
+                ->first();
+
+            if (
+                !$template
+                || !PlanCapabilities::templateAllowed(
+                    (string) $plan->code,
+                    (string) $template->min_plan
+                )
+            ) {
+                return redirect()
+                    ->route('invitations.themes', ['plan' => $plan->code])
+                    ->withErrors([
+                        'template' => 'Template Studio tidak tersedia untuk paket yang dipilih.',
+                    ]);
+            }
         }
 
         return view('invitations.initial', [
             'plan' => $plan,
-            'theme' => $theme,
-            'themeMeta' => ThemeCatalog::all()[$theme],
+            'template' => $template,
+            'isBlank' => PlanCapabilities::isSystemBlankTemplate($template),
         ]);
     }
 
@@ -190,14 +207,16 @@ class InvitationController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'selected_plan' => ['required', 'string', 'max:30'],
-            'theme' => ['required', Rule::in(ThemeCatalog::activeCodes())],
+            'selected_plan' => ['required', 'string', Rule::in(['basic', 'premium', 'royal'])],
+            'studio_template_id' => [
+                'required',
+                'integer',
+                Rule::exists('studio_templates', 'id')
+                    ->where(fn ($query) => $query->where('status', 'published')),
+            ],
             'title' => ['required', 'string', 'max:150'],
             'slug' => [
-                'nullable',
-                'string',
-                'max:160',
-                'regex:/^[a-z0-9-]+$/',
+                'nullable', 'string', 'max:160', 'regex:/^[a-z0-9-]+$/',
                 Rule::unique('invitations', 'slug'),
             ],
             'groom_name' => ['required', 'string', 'max:100'],
@@ -208,12 +227,27 @@ class InvitationController extends Controller
         ]);
 
         $plan = $this->selectedPlan($data['selected_plan']);
+        $template = StudioTemplate::query()
+            ->whereKey((int) $data['studio_template_id'])
+            ->where('status', 'published')
+            ->firstOrFail();
 
-        abort_unless(
-            $this->themeAllowed($plan->code, $data['theme']),
-            422,
-            'Tema ini tidak tersedia untuk paket yang dipilih.'
-        );
+        if (PlanCapabilities::isSystemBlankTemplate($template)) {
+            abort_unless(
+                PlanCapabilities::blankAllowed((string) $plan->code),
+                403,
+                'Blank canvas tidak tersedia untuk Basic.'
+            );
+        } else {
+            abort_unless(
+                PlanCapabilities::templateAllowed(
+                    (string) $plan->code,
+                    (string) $template->min_plan
+                ),
+                422,
+                'Template Studio tidak tersedia untuk paket yang dipilih.'
+            );
+        }
 
         $slug = $data['slug']
             ?: Str::slug($data['title']) . '-' . Str::lower(Str::random(5));
@@ -223,33 +257,27 @@ class InvitationController extends Controller
             'event', 'rsvp', 'gift', 'guest_photo', 'wishes',
         ];
 
-        $invitation = $request
-            ->user()
-            ->invitations()
-            ->create([
-                'title' => $data['title'],
-                'slug' => $slug,
-                'groom_name' => $data['groom_name'],
-                'bride_name' => $data['bride_name'],
-                'event_date' => $data['event_date'],
-                'venue_name' => $data['venue_name'],
-                'venue_address' => $data['venue_address'] ?? null,
-                'theme' => $data['theme'],
-                'plan' => $plan->code === 'free' ? 'free' : 'pending',
-                'gallery' => [],
-                'gift_accounts' => [],
-                'sections' => array_merge(
-                    ['order' => $sectionOrder],
-                    array_fill_keys($sectionOrder, true)
-                ),
-                'is_published' => false,
-            ]);
+        $invitation = $request->user()->invitations()->create([
+            'title' => $data['title'],
+            'slug' => $slug,
+            'groom_name' => $data['groom_name'],
+            'bride_name' => $data['bride_name'],
+            'event_date' => $data['event_date'],
+            'venue_name' => $data['venue_name'],
+            'venue_address' => $data['venue_address'] ?? null,
+            'theme' => 'modern',
+            'studio_template_id' => $template->id,
+            'plan' => 'pending',
+            'gallery' => [],
+            'gift_accounts' => [],
+            'sections' => array_merge(
+                ['order' => $sectionOrder],
+                array_fill_keys($sectionOrder, true)
+            ),
+            'is_published' => false,
+        ]);
 
-        if ($plan->code === 'free') {
-            return redirect()
-                ->route('invitations.edit', $invitation)
-                ->with('ok', 'Undangan gratis aktif. Lengkapi konten sebelum publish.');
-        }
+        $invitation->forceFill(['studio_template_id' => $template->id])->save();
 
         $request->user()->orders()->create([
             'invitation_id' => $invitation->id,
@@ -262,7 +290,7 @@ class InvitationController extends Controller
 
         return redirect()
             ->route('orders.checkout', $invitation)
-            ->with('ok', 'Data awal tersimpan. Selesaikan pembayaran untuk mengaktifkan editor.');
+            ->with('ok', 'Data dan pilihan Studio tersimpan. Selesaikan pembayaran untuk mengaktifkan editor.');
     }
 
     public function edit(Invitation $invitation)
@@ -272,15 +300,11 @@ class InvitationController extends Controller
         if ($invitation->plan === 'pending') {
             return redirect()
                 ->route('orders.checkout', $invitation)
-                ->with('ok', 'Selesaikan pembayaran dan tunggu verifikasi sebelum membuka editor.');
+                ->with('ok', 'Selesaikan pembayaran dan tunggu verifikasi sebelum membuka Studio.');
         }
 
-        return view('invitations.form', [
-            'invitation' => $invitation,
-            // Package changes are handled by admin after checkout. This also
-            // hides the legacy purchase block from the content editor.
-            'plans' => collect(),
-        ]);
+        return redirect()
+            ->route('studio.invitation.open', $invitation);
     }
 
     public function update(
@@ -320,11 +344,7 @@ class InvitationController extends Controller
         $data['gift_accounts'] = $this->giftAccounts($request);
 
         if (
-            !in_array(
-                strtolower((string) $invitation->plan),
-                ['premium', 'pro'],
-                true
-            )
+            !PlanCapabilities::fullEditor((string) $invitation->plan)
         ) {
             $data['gift_accounts'] = [];
             $data['music_url'] = null;
@@ -424,9 +444,6 @@ class InvitationController extends Controller
             false
         );
 
-        app(StudioInvitationSync::class)
-            ->syncIfAttached($invitation->fresh());
-
         return redirect()
             ->route(
                 'invitations.edit',
@@ -447,9 +464,6 @@ class InvitationController extends Controller
             ->deleteDirectory(
                 "invitations/{$invitation->id}"
             );
-
-        app(StudioInvitationSync::class)
-            ->deleteForInvitation($invitation);
 
         $invitation->delete();
 
@@ -475,9 +489,6 @@ class InvitationController extends Controller
         $invitation->update([
             'is_published' => !$invitation->is_published,
         ]);
-
-        app(StudioInvitationSync::class)
-            ->syncStatus($invitation->fresh());
 
         return back()->with(
             'ok',
@@ -763,6 +774,13 @@ class InvitationController extends Controller
         string $theme
     ): bool {
         return ThemeCatalog::allows($planCode, $theme);
+    }
+
+    private function studioTemplateAllowed(
+        string $planCode,
+        string $minimumPlan
+    ): bool {
+        return PlanCapabilities::templateAllowed($planCode, $minimumPlan);
     }
 
     private function sections(

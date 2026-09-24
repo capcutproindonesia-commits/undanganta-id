@@ -107,7 +107,11 @@ class StudioPublicController extends Controller
             'instance' => $instance,
             'template' => $template,
             'snapshot' => $instance->template_snapshot ?: ($template->canvas ?: []),
-            'content' => $instance->content ?? [],
+            'content' => $this->withMediaUrls(
+                $instance,
+                $instance->content ?? [],
+                $token
+            ),
             'designOverrides' => $instance->design_overrides ?? [],
             'token' => $token,
             'production' => $production,
@@ -266,6 +270,68 @@ class StudioPublicController extends Controller
                 'g' => $guest?->token,
             ]))
             ->with('ok', 'Foto berhasil dikirim dan menunggu persetujuan.');
+    }
+
+    public function media(
+        string $token,
+        string $key
+    ): Response {
+        $allowed = [
+            'groom_photo', 'bride_photo', 'couple_photo',
+            'gallery_1', 'gallery_2', 'gallery_3',
+            'opening_cover_media', 'desktop_cover_media',
+        ];
+
+        abort_unless(in_array($key, $allowed, true), 404);
+
+        $instance = StudioTemplateInstance::query()
+            ->where('public_token', $token)
+            ->firstOrFail();
+
+        $value = data_get($instance->content ?? [], $key);
+        abort_unless(is_array($value) && !empty($value['path']), 404);
+
+        $path = ltrim((string) $value['path'], '/');
+        abort_unless(Storage::disk('public')->exists($path), 404);
+
+        $mime = Storage::disk('public')->mimeType($path)
+            ?: 'application/octet-stream';
+
+        return response(
+            Storage::disk('public')->get($path),
+            200,
+            [
+                'Content-Type' => $mime,
+                'Cache-Control' => 'private, max-age=3600',
+                'X-Content-Type-Options' => 'nosniff',
+            ]
+        );
+    }
+
+    private function withMediaUrls(
+        StudioTemplateInstance $instance,
+        array $content,
+        string $token
+    ): array {
+        foreach ([
+            'groom_photo', 'bride_photo', 'couple_photo',
+            'gallery_1', 'gallery_2', 'gallery_3',
+            'opening_cover_media', 'desktop_cover_media',
+        ] as $key) {
+            $value = $content[$key] ?? null;
+
+            if (!is_array($value) || empty($value['path'])) {
+                continue;
+            }
+
+            $value['url'] = route('studio.public.media', [
+                'token' => $token,
+                'key' => $key,
+            ]);
+            $content[$key] = $value;
+        }
+
+        return $content;
     }
 
     public function asset(string $token, StudioAsset $asset): Response

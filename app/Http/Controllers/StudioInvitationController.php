@@ -6,6 +6,7 @@ use App\Models\Invitation;
 use App\Models\StudioTemplate;
 use App\Models\StudioTemplateInstance;
 use App\Support\StudioInvitationSync;
+use App\Support\PlanCapabilities;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -24,6 +25,7 @@ class StudioInvitationController extends Controller
 
         $templates = StudioTemplate::query()
             ->where('status', 'published')
+            ->where('slug', '!=', '__system-blank-canvas')
             ->orderBy('name')
             ->get()
             ->filter(
@@ -115,26 +117,68 @@ class StudioInvitationController extends Controller
     ): RedirectResponse {
         $this->authorize('update', $invitation);
 
+        if ($invitation->plan === 'pending') {
+            return redirect()
+                ->route('orders.checkout', $invitation)
+                ->with('ok', 'Aktifkan paket sebelum membuka Studio.');
+        }
+
         if (!$invitation->studio_template_id) {
-            return redirect()->route(
-                'studio.invitation.manage',
-                $invitation
-            );
+            $template = StudioTemplate::query()
+                ->where('status', 'published')
+                ->orderBy('id')
+                ->get()
+                ->first(
+                    fn (StudioTemplate $candidate) =>
+                        $this->templateAllowed(
+                            (string) $invitation->plan,
+                            (string) $candidate->min_plan
+                        )
+                );
+
+            if (!$template) {
+                return redirect()
+                    ->route('studio.invitation.manage', $invitation)
+                    ->withErrors([
+                        'studio' => 'Belum ada template Studio published yang tersedia untuk paket ini.',
+                    ]);
+            }
+
+            $invitation->forceFill([
+                'studio_template_id' => $template->id,
+            ])->save();
+        }
+
+        $template = StudioTemplate::query()
+            ->whereKey($invitation->studio_template_id)
+            ->where('status', 'published')
+            ->first();
+
+        if (
+            !$template
+            || !$this->templateAllowed(
+                (string) $invitation->plan,
+                (string) $template->min_plan
+            )
+        ) {
+            $invitation->forceFill([
+                'studio_template_id' => null,
+            ])->save();
+
+            return redirect()
+                ->route('studio.invitation.open', $invitation)
+                ->withErrors([
+                    'studio' => 'Template Studio sebelumnya tidak tersedia lagi. Sistem memilih template aktif lain.',
+                ]);
         }
 
         $instance = StudioTemplateInstance::query()
             ->where('invitation_id', $invitation->id)
-            ->where(
-                'studio_template_id',
-                $invitation->studio_template_id
-            )
+            ->where('studio_template_id', $template->id)
             ->latest('id')
             ->first();
 
         if (!$instance) {
-            $template = StudioTemplate::query()
-                ->findOrFail($invitation->studio_template_id);
-
             $instance = StudioTemplateInstance::create([
                 'studio_template_id' => $template->id,
                 'invitation_id' => $invitation->id,
@@ -148,6 +192,7 @@ class StudioInvitationController extends Controller
                 'design_overrides' => [],
                 'meta' => [
                     'purpose' => 'production_invitation',
+                    'attached_at' => now()->toIso8601String(),
                 ],
             ]);
         }
@@ -207,13 +252,6 @@ class StudioInvitationController extends Controller
         string $invitationPlan,
         string $minimumPlan
     ): bool {
-        $rank = [
-            'free' => 0,
-            'premium' => 1,
-            'pro' => 2,
-        ];
-
-        return ($rank[strtolower($invitationPlan)] ?? -1)
-            >= ($rank[strtolower($minimumPlan)] ?? 99);
+        return PlanCapabilities::templateAllowed($invitationPlan, $minimumPlan);
     }
 }

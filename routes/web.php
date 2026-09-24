@@ -516,3 +516,6 @@ Route::middleware([
 /* UNDANGANTA Studio V1 */
 require __DIR__.'/studio.php';
 
+/* UNDANGANTA_CUSTOMER_MEDIA_ROUTES_V1_1 */
+\Illuminate\Support\Facades\Route::get('studio/customer/instances/{instance}/assets/{asset}/stream', [\App\Http\Controllers\StudioCustomerController::class, 'streamAsset'])->name('studio.customer.assets.stream');
+\Illuminate\Support\Facades\Route::delete('studio/customer/instances/{instance}/assets/{asset}', [\App\Http\Controllers\StudioCustomerController::class, 'destroyAsset'])->name('studio.customer.assets.destroy');

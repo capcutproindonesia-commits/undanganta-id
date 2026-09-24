@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Invitation;
 use App\Models\Order;
-use App\Support\ThemeCatalog;
+use App\Models\StudioTemplate;
+use App\Support\PlanCapabilities;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -94,13 +95,25 @@ class OrderController extends Controller
 
     private function ensureThemeMatchesPlan(Invitation $invitation, Order $order): void
     {
+        $template = StudioTemplate::query()->findOrFail($invitation->studio_template_id);
+
+        if (PlanCapabilities::isSystemBlankTemplate($template)) {
+            abort_unless(
+                PlanCapabilities::blankAllowed((string) $order->plan->code),
+                422,
+                'Blank canvas tidak tersedia untuk paket ini.'
+            );
+            return;
+        }
+
         abort_unless(
-            ThemeCatalog::compatibleWithPlan(
-                $order->plan->code,
-                $invitation->theme
+            $template->status === 'published'
+            && PlanCapabilities::templateAllowed(
+                (string) $order->plan->code,
+                (string) $template->min_plan
             ),
             422,
-            'Tema order tidak sesuai dengan paket.'
+            'Template Studio order tidak sesuai dengan paket.'
         );
     }
 }
